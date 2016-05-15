@@ -47,4 +47,5 @@ Temporary Items
 .apdisk
 *.exe
 *.o
+ExtLibTest.depend
 ExtLibTest.layout
