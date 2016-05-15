@@ -1,5 +1,5 @@
 /**
- * \file extlib.def.h
+ * \file Common.h
  * \brief Functions and types needed by ExtLib
  * \author Jason Pindat
  * \version 1.0
@@ -7,13 +7,19 @@
  *
  */
 
-#ifndef EXTLIB_DEF_H
-#define EXTLIB_DEF_H
+#ifndef EXTLIB_COMMON_H
+#define EXTLIB_COMMON_H
 
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+typedef enum {
+    ARRAY,
+    SIMPLELIST,
+    DOUBLELIST
+} RealType;
 
 /** Ascendant sorting */
 #define EL_ASC        1
@@ -54,18 +60,24 @@
 /** Ptr : type for a generic pointer. */
 typedef void *Ptr;
 
-/** ElCmpFct : A comparison function. must take 2 generic pointers (Ptr) to objects and return an int */
-typedef int(*ElCmpFct)(Ptr, Ptr);
+/** ElCmpFct : A comparison function. must take 2 generic pointers (Ptr) to objects and return an int (<0 if elt1 < elt2, =0 if elt1 = elt2, >0 if elt1> elt2) */
+typedef int(*ElCmpFct)(Ptr elt1, Ptr elt2);
+
+/** ElCopyFct : A copy function. must take 2 generic pointers (Ptr) 1st to the source, 2nd to destination and return nothing */
+typedef void(*ElCopyFct)(Ptr src, Ptr dest);
+
+/** ElDelFct : A deletion function. must take 1 generic pointers (Ptr) to the object to delete and return nothing */
+typedef void(*ElDelFct)(Ptr obj);
 
 
-/** \brief Throws an error.
+/* \brief Throws an error.
  *
  * \param module : Name of the module and function that throws the error.
  * \param msg : Error message.
  * \return void
  *
  */
-void throwExc(char *module, char *msg);
+//void throwExc(char *module, char *msg);
 
 /** \brief Returns the comparison function from a type
  *

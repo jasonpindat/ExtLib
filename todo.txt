@@ -12,3 +12,8 @@ tas binomial
 tas fibo
 hash table
 Skip list
+
+
+--
+
+Continuer List.c et List.h puis enchainer sur SimpleList et DoubleList etc...

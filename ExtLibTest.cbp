@@ -19,38 +19,24 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="extlib.def.c">
+		<Unit filename="Array.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="extlib.def.h" />
-		<Unit filename="extlib.dll.c">
+		<Unit filename="Array.h" />
+		<Unit filename="Common.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="extlib.dll.h" />
-		<Unit filename="extlib.dll.more.h" />
-		<Unit filename="extlib.h" />
-		<Unit filename="extlib.heap.c">
+		<Unit filename="Common.h" />
+		<Unit filename="Iterable.h" />
+		<Unit filename="Iterator.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="extlib.heap.h" />
-		<Unit filename="extlib.more.h" />
-		<Unit filename="extlib.queue.h" />
-		<Unit filename="extlib.sll.c">
+		<Unit filename="Iterator.h" />
+		<Unit filename="List.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="extlib.sll.h" />
-		<Unit filename="extlib.sll.more.h" />
-		<Unit filename="extlib.stack.h" />
-		<Unit filename="extlib.string.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="extlib.string.h" />
-		<Unit filename="extlib.vect.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="extlib.vect.h" />
-		<Unit filename="extlib.vect.more.h" />
-		<Unit filename="main.c">
+		<Unit filename="List.h" />
+		<Unit filename="testArray.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="todo.txt" />
