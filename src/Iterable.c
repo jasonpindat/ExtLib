@@ -8,6 +8,11 @@
  */
 
 #include "ExtLib/Iterable.h"
+#include "ExtLib/Common.h"
+#include "ExtLib/Collection.h"
+#include "ExtLib/Array.h"
+#include "ExtLib/List.h"
+#include "ExtLib/String.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,6 +26,8 @@ static ForEachFct getForEachFct(Collection c) {
         return (ForEachFct)arrayForEach;
     case LIST:
         return (ForEachFct)listForEach;
+    case STRING:
+        return (ForEachFct)stringForEach;
     default:
         return NULL;
     }

@@ -40,6 +40,7 @@ String stringNew() {
     String str=malloc(sizeof(struct _String));
 
     str->type = STRING;
+
     str->length = 0;
     str->capacity = DEFSIZE;
     str->ct = malloc(DEFSIZE*sizeof(char));
@@ -64,6 +65,7 @@ String stringClone(String str) {
     String str2=malloc(sizeof(struct _String));
 
     str2->type = STRING;
+
     str2->length = str->length;
     str2->capacity = str->capacity;
     str2->ct=malloc(str2->capacity*sizeof(char));
@@ -76,6 +78,7 @@ String stringSubString(String str, int start, int end) {
     String str2 = malloc(sizeof(struct _String));
 
     str2->type = STRING;
+
     str2->length = end-start;
 
     str2->capacity = DEFSIZE;
@@ -172,4 +175,13 @@ void stringDump(String str) {
     printf("\t%d bytes used as operating cost\n", opcost);
     printf("\t%d bytes used as preallocated\n", preallcost);
     printf("\t%d bytes total used\n", effcost+opcost+preallcost);
+}
+
+
+
+// Iteration
+
+void stringForEach(String str, ElActFct actFct, Ptr infos) {
+    for(int i=0; i<str->length; i++)
+        actFct(str->ct + i, infos);
 }

@@ -160,4 +160,18 @@ void stringAppendChar(String str, const char c);
  */
 void stringDump(String str);
 
+
+
+// Iteration
+
+/** \brief makes an action for every character of the string
+ *
+ * \param str : String to iterate.
+ * \param actFct : Pointer to a function called for each element of the string.
+ * \param infos : pointer broadcasted to actFct. Useful to share additional informations to the function.
+ * \return nothing.
+ *
+ */
+void stringForEach(String str, ElActFct actFct, Ptr infos);
+
 #endif

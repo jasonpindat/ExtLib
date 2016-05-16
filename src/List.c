@@ -83,11 +83,11 @@ List listClone(List l) {
     l2->copyFct = l->copyFct;
     l2->delFct = l->delFct;
 
-    for(ListIt it=listItNew(l); listItExists(&it); listItNext(&it)) {
-        Ptr data = listItGet_base(&it);
-        listAddLast_base(l2, data);
-        if(l->delFct)
-            l->delFct(data);
+    ListNode node = l->first;
+
+    while(node) {
+        listAddLast_base(l2, node->data);
+        node = node->next;
     }
 
     return l2;

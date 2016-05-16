@@ -1,74 +1,148 @@
-#include "extlib.def.h"
-#include "extlib.sll.h"
-#include "extlib.sll.more.h"
+/**
+ * \file SimpleList.c
+ * \author Jason Pindat
+ * \date 2016-05-16
+ *
+ * Copyright 2014-2016
+ *
+ */
 
-struct _Sll {
-    ElCmpFct cmpFct;
-    SllNode first;
+#include "ExtLib/Common.h"
+#include "ExtLib/SimpleList.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct _SimpleList {
+    RealType type;
     int elemSize;
+    ElCopyFct copyFct;
+    ElDelFct delFct;
+
+    ElCmpFct cmpFct;
+    Ptr temp;
+    int length;
+
+    SimpleListNode first;
 };
 
-struct _SllNode {
+struct _SimpleListNode {
     Ptr data;
-    SllNode next;
+    SimpleListNode next;
 };
 
 
 
-Sll sllNew(int elemSize) {
-    Sll list = malloc(sizeof(struct _Sll));
+SimpleList simpleListNew(int elemSize) {
+    SimpleList l = malloc(sizeof(struct _Sll));
+
+    l->type = SIMPLELIST;
 
     if(elemSize<=0) {
-        list->elemSize=_elSizeFct(elemSize);
-        list->cmpFct=_elCompareFct(elemSize);
+        l->elemSize=_elSizeFct(elemSize);
+        l->cmpFct=_elCompareFct(elemSize);
     }
     else {
-        list->elemSize=elemSize;
-        list->cmpFct=NULL;
+        l->elemSize=elemSize;
+        l->cmpFct=NULL;
     }
 
-    list->first=NULL;
-    return list;
+    l->copyFct = NULL;
+    l->delFct = NULL;
+
+    l->temp = malloc(l->elemSize);
+    l->length = 0;
+
+    l->first=NULL;
+
+    return l;
 }
 
-void sllDel(Sll list) {
-    sllClear(list);
-    free(list);
+void simpleListDel(SimpleList l) {
+    simpleListClear(l);
+    free(l->temp);
+    free(l);
 }
 
 
 
-bool sllIsEmpty(Sll list) {
-    return !list->first;
+void simpleListComparable(SimpleList l, ElCmpFct fct) {
+    l->cmpFct = fct;
 }
 
-Sll sllClear(Sll list) {
-    SllNode node = list->first;
-    SllNode noden;
+
+
+SimpleList simpleListClone(Simple l) {
+    SimpleList l2 = listNew(l->elemSize);
+
+    l2->cmpFct = l->cmpFct;
+    l2->copyFct = l->copyFct;
+    l2->delFct = l->delFct;
+
+    SimpleListNode node = l->first;
+    bool first = true;
+    SimpleListIt it;
 
     while(node) {
-        noden = node;
-        node=node->next;
-        free(noden->data);
-        free(noden);
-    }
-    list->first=NULL;
-    return list;
-}
+        if(first) {
+            simpleListAddFirst_base(l2, node->data);
+            it = simpleListItNew(l2);
+            first = false;
+        }
+        else {
+            simpleListItAddAfter(&it);
+            simpleListItNext(&it);
+        }
 
-int sllCount(Sll list) {
-    int size=0;
-    SllNode node = list->first;
-
-    while(node) {
-        size++;
         node = node->next;
     }
-    return size;
+
+    return l2;
 }
 
-Ptr sllGetData_base(SllNode node) {
-    return node->data;
+
+
+void simpleListClear(SimpleList l) {
+    SimpleListNode node = l->first;
+    SimpleListNode nodeSave;
+
+    while(node) {
+        if(l->delFct)
+            l->delFct(node->data);
+
+        nodeSave = node;
+        node = node->next;
+        free(nodeSave);
+    }
+
+    l->length = 0;
+    l->first = NULL;
+}
+
+
+
+bool simpleListIsEmpty(SimpleList l) {
+    return !l->first;
+}
+
+int simpleListLength(SimpleList l) {
+    return l->length;
+}
+
+
+
+bool simpleListContains(SimpleList l, Ptr data) {
+    SimpleListNode node = l->first;
+
+    while(node) {
+        if(l->cmpFct(node->data, data) == 0)
+            return true;
+
+        node = node->next;
+    }
+
+    return false;
 }
 
 
@@ -241,11 +315,6 @@ Sll sllPopAt(Sll list, int pos) {
 }
 
 
-
-Sll sllComparable(Sll list, ElCmpFct fct) {
-    list->cmpFct=fct;
-    return list;
-}
 
 Sll sllSort(Sll list, int method) {
     SllNode first=list->first;

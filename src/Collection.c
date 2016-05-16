@@ -20,6 +20,8 @@ struct _Collection {
     ElDelFct delFct;
 };
 
+
+
 RealType collectionGetType(Collection c) {
     return c->type;
 }
@@ -28,9 +30,16 @@ bool collectionInstanceOf(Collection c, RealType r) {
     return c->type == r;
 }
 
+
+
 int collectionGetElemSize(Collection c) {
+    if(c->type == STRING)
+        return sizeof(char);
+
     return c->elemSize;
 }
+
+
 
 void collectionElementInstanciable(Collection c, ElCopyFct copyFct, ElDelFct delFct) {
     c->copyFct = copyFct;
@@ -38,9 +47,15 @@ void collectionElementInstanciable(Collection c, ElCopyFct copyFct, ElDelFct del
 }
 
 ElCopyFct collectionGetCopyFunction(Collection c) {
+    if(c->type == STRING)
+        return NULL;
+
     return c->copyFct;
 }
 
 ElDelFct collectionGetDelFunction(Collection c) {
+    if(c->type == STRING)
+        return NULL;
+
     return c->delFct;
 }

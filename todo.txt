@@ -17,3 +17,6 @@ Skip list
 --
 
 Test List, test String a faire
+Ajouter indexOf a String
+SimpleList.h fait
+Continuer SimpleList.c après simpleListContains

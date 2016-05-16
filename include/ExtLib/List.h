@@ -90,7 +90,7 @@ int listLength(List l);
 
 
 
-/** \brief Tells if the list contains an element or not, listComparable must have been called or the vector must have been created with a EL_* constant.
+/** \brief Tells whether the list contains an element or not, listComparable must have been called or the vector must have been created with a EL_* constant.
  *
  * \param l : List to look into.
  * \param data : Element to seek.
