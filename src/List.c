@@ -7,8 +7,12 @@
  *
  */
 
-#include "Common.h"
-#include "List.h"
+#include "ExtLib/Common.h"
+#include "ExtLib/List.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 struct _List {
     RealType type;
@@ -138,7 +142,7 @@ bool listContains(List l, Ptr data) {
 
 Ptr listGetFirst_base(List l) {
     if(l->copyFct) {
-        l->copyFct(l->first->data, l->temp);
+        l->copyFct(l->temp, l->first->data);
         return l->temp;
     }
     else
@@ -147,7 +151,7 @@ Ptr listGetFirst_base(List l) {
 
 Ptr listGetLast_base(List l) {
     if(l->copyFct) {
-        l->copyFct(l->last->data, l->temp);
+        l->copyFct(l->temp, l->last->data);
         return l->temp;
     }
     else
@@ -161,7 +165,7 @@ void listSetFirst_base(List l, Ptr data) {
         l->delFct(l->first->data);
 
     if(l->copyFct)
-        l->copyFct(data, l->first->data);
+        l->copyFct(l->first->data, data);
     else
         memcpy(l->first->data, data, l->elemSize);
 }
@@ -171,7 +175,7 @@ void listSetLast_base(List l, Ptr data) {
         l->delFct(l->last->data);
 
     if(l->copyFct)
-        l->copyFct(data, l->last->data);
+        l->copyFct(l->last->data, data);
     else
         memcpy(l->last->data, data, l->elemSize);
 }
@@ -195,7 +199,7 @@ void listAddFirst_base(List l, Ptr data) {
     node->data = memory + sizeof(struct _ListNode);
 
     if(l->copyFct)
-        l->copyFct(data, node->data);
+        l->copyFct(node->data, data);
     else
         memcpy(node->data, data, l->elemSize);
 
@@ -219,7 +223,7 @@ void listAddLast_base(List l, Ptr data) {
     node->data = memory + sizeof(struct _ListNode);
 
     if(l->copyFct)
-        l->copyFct(data, node->data);
+        l->copyFct(node->data, data);
     else
         memcpy(node->data, data, l->elemSize);
 
@@ -306,7 +310,7 @@ void listSort(List l, int method) {
 
 
 
-void listHeap(List l) {
+void listDump(List l) {
     int elts = l->length;
     int effcost = elts*l->elemSize;
     int opcost = sizeof(struct _List)+elts * sizeof(struct _ListNode);
@@ -360,7 +364,7 @@ void listItPrev(ListIt *it) {
 
 Ptr listItGet_base(ListIt *it) {
     if(it->list->copyFct) {
-        it->list->copyFct(it->node->data, it->list->temp);
+        it->list->copyFct(it->list->temp, it->node->data);
         return it->list->temp;
     }
     else
@@ -374,7 +378,7 @@ void listItSet_base(ListIt *it, Ptr data) {
         it->list->delFct(it->node->data);
 
     if(it->list->copyFct)
-        it->list->copyFct(data, it->node->data);
+        it->list->copyFct(it->node->data, data);
     else
         memcpy(it->node->data, data, it->list->elemSize);
 }
@@ -398,7 +402,7 @@ void listItAddAfter_base(ListIt *it, Ptr data) {
     newnode->data = memory + sizeof(struct _ListNode);
 
     if(it->list->copyFct)
-        it->list->copyFct(data, newnode->data);
+        it->list->copyFct(newnode->data, data);
     else
         memcpy(newnode->data, data, it->list->elemSize);
 
@@ -422,7 +426,7 @@ void listItAddBefore_base(ListIt *it, Ptr data) {
     newnode->data = memory + sizeof(struct _ListNode);
 
     if(it->list->copyFct)
-        it->list->copyFct(data, newnode->data);
+        it->list->copyFct(newnode->data, data);
     else
         memcpy(newnode->data, data, it->list->elemSize);
 

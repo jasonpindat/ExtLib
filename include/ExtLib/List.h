@@ -204,7 +204,7 @@ void listSort(List l, int method);
  * \return void
  *
  */
-void listHeap(List l);
+void listDump(List l);
 
 
 

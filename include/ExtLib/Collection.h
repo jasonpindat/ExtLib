@@ -5,6 +5,7 @@
  * \date 2016-05-16
  *
  * Copyright 2014-2016
+ *
  */
 
 #ifndef EXTLIB_COLLECTION_H
@@ -49,7 +50,7 @@ int collectionGetElemSize(Collection c);
 /** \brief Sets the functions to copy an element and to delete an element of this collection. If NULL or collectionElementCopy is not called, the elements will be copied bit by bit.
  *
  * \param c : Collection in which you set the fonction.
- * \param copyFct : pointer to the copy function, the function must take 2 pointers, the first is the source element and the second is the new allocated element to initialize and return nothing.
+ * \param copyFct : pointer to the copy function, the function must take 2 pointers, the first is the new allocated element to initialize and the second is the source element and return nothing.
  * \param delFct : pointer to the deletion function, the function must take a pointer to the element to destroy. Note that this pointer will be automatically freed, so delFct must'nt do this.
  * \return nothing.
  *

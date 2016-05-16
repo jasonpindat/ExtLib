@@ -137,15 +137,6 @@ int arrayLastIndexOf(Array a, Ptr data);
 
 
 
-/** \brief Returns the last element in an array.
- *
- * \param a : Array to seek in.
- * \return Pointer to data.
- *
- */
-Ptr arrayTop_base(Array a);
-#define arrayTop(a, type) (*(type*)arrayTop_base(a))
-
 /** \brief Returns the element at a given position in an array.
  *
  * \param a : Array to seek in.
@@ -238,7 +229,7 @@ void arrayRandomize(Array a);
  * \return nothing.
  *
  */
-void arrayHeap(Array a);
+void arrayDump(Array a);
 
 
 

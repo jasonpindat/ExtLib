@@ -7,9 +7,12 @@
  *
  */
 
-#include "Common.h"
-#include "Array.h"
+#include "ExtLib/Common.h"
+#include "ExtLib/Array.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define DEFSIZE 8
@@ -117,7 +120,7 @@ Array arraySubArray(Array a, int from, int to) {
 
     if(a2->copyFct) {
         for(int i=0; i<a2->length; i++)
-            a2->copyFct(a->ct + (i+from)*a2->elemSize, a2->ct + i*a2->elemSize);
+            a2->copyFct(a2->ct + i*a2->elemSize, a->ct + (i+from)*a2->elemSize);
     }
     else
         memcpy(a2->ct, a->ct + from*a2->elemSize, a2->length*a2->elemSize);
@@ -178,13 +181,9 @@ int arrayLastIndexOf(Array a, Ptr data) {
 
 
 
-Ptr arrayTop_base(Array a) {
-    return arrayGet_base(a, a->length-1);
-}
-
 Ptr arrayGet_base(Array a, int pos) {
     if(a->copyFct) {
-        a->copyFct(a->ct + a->elemSize*pos, a->temp);
+        a->copyFct(a->temp, a->ct + a->elemSize*pos);
         return a->temp;
     }
     else
@@ -198,7 +197,7 @@ void arraySet_base(Array a, int pos, Ptr data) {
         a->delFct(a->ct + a->elemSize*pos);
 
     if(a->copyFct)
-        a->copyFct(data, a->ct + a->elemSize*pos);
+        a->copyFct(a->ct + a->elemSize*pos, data);
     else
         memcpy(a->ct + a->elemSize*pos, data, a->elemSize);
 }
@@ -216,7 +215,7 @@ void arrayAdd_base(Array a, int pos, Ptr data) {
     arrayShift(a, pos);
 
     if(a->copyFct)
-        a->copyFct(data, a->ct + a->elemSize*pos);
+        a->copyFct(a->ct + a->elemSize*pos, data);
     else
         memcpy(a->ct + a->elemSize*pos, data, a->elemSize);
 
@@ -280,7 +279,7 @@ void arrayRandomize(Array a) {
 
 
 
-void arrayHeap(Array a) {
+void arrayDump(Array a) {
     int elts=arrayLength(a);
     int effcost=elts*a->elemSize;
     int opcost=sizeof(struct _Array);

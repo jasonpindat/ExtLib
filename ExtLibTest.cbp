@@ -13,18 +13,21 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="include" />
 				</Compiler>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="include" />
 		</Compiler>
-		<Unit filename="include/Array.h" />
-		<Unit filename="include/Collection.h" />
-		<Unit filename="include/Common.h" />
-		<Unit filename="include/Iterable.h" />
-		<Unit filename="include/List.h" />
+		<Unit filename="include/ExtLib/Array.h" />
+		<Unit filename="include/ExtLib/Collection.h" />
+		<Unit filename="include/ExtLib/Common.h" />
+		<Unit filename="include/ExtLib/Iterable.h" />
+		<Unit filename="include/ExtLib/List.h" />
+		<Unit filename="include/ExtLib/Queue.h" />
+		<Unit filename="include/ExtLib/Stack.h" />
+		<Unit filename="include/ExtLib/String.h" />
 		<Unit filename="src/Array.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -38,6 +41,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/List.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/String.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="testArray.c">

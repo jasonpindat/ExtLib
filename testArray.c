@@ -1,8 +1,11 @@
 
-#include "Collection.h"
-#include "Array.h"
+#include "ExtLib/Collection.h"
+#include "ExtLib/Array.h"
 
 #include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void testArray1() {
     int nb=100;
@@ -19,11 +22,11 @@ void testArray1() {
 
     free(vals);
 
-    arrayHeap(a);
+    arrayDump(a);
 
     arrayTrimCapacity(a);
 
-    arrayHeap(a);
+    arrayDump(a);
 
     arrayRandomize(a);
 
@@ -70,7 +73,7 @@ struct test {
     int *nb;
 };
 
-void copyTest(struct test *src, struct test *dest) {
+void copyTest(struct test *dest, struct test *src) {
     dest->nb = malloc(sizeof(int));
     *(dest->nb) = *(src->nb);
 }

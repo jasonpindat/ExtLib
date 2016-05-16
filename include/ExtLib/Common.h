@@ -12,13 +12,11 @@
 #define EXTLIB_COMMON_H
 
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 typedef enum {
     ARRAY,
-    LIST
+    LIST,
+    STRING
 } RealType;
 
 /** Ascendant sorting */
@@ -63,8 +61,8 @@ typedef void *Ptr;
 /** ElCmpFct : A comparison function. must take 2 generic pointers (Ptr) to objects and return an int (<0 if elt1 < elt2, =0 if elt1 = elt2, >0 if elt1> elt2) */
 typedef int(*ElCmpFct)(Ptr elt1, Ptr elt2);
 
-/** ElCopyFct : A copy function. must take 2 generic pointers (Ptr) 1st to the source, 2nd to destination and return nothing */
-typedef void(*ElCopyFct)(Ptr src, Ptr dest);
+/** ElCopyFct : A copy function. must take 2 generic pointers (Ptr) 1st to the destination, 2nd to source and return nothing */
+typedef void(*ElCopyFct)(Ptr dest, Ptr src);
 
 /** ElDelFct : A deletion function. must take 1 generic pointer (Ptr) to the object to delete and return nothing */
 typedef void(*ElDelFct)(Ptr obj);

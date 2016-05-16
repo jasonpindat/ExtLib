@@ -1,4 +1,15 @@
-#include "Common.h"
+/**
+ * \file Common.c
+ * \author Jason Pindat
+ * \date 2016-05-16
+ *
+ * Copyright 2014-2016
+ *
+ */
+
+#include "ExtLib/Common.h"
+
+#include <stdlib.h>
 
 /*void throwExc(char *module, char *msg) {
     fprintf(stderr, "/!\\ [%s] %s", module, msg);

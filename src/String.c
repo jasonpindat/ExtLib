@@ -1,9 +1,24 @@
-#include "extlib.def.h"
-#include "extlib.string.h"
+/**
+ * \file String.c
+ * \author Jason Pindat
+ * \date 2016-05-16
+ *
+ * Copyright 2014-2016
+ *
+ */
+
+#include "ExtLib/Common.h"
+#include "ExtLib/String.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define DEFSIZE 8
 
 struct _String {
+    RealType type;
+
     int length;
     int capacity;
     char *ct;
@@ -11,14 +26,12 @@ struct _String {
 
 
 
-static void stringResize(String, int);
-
 static void stringResize(String str, int minimumNeeded) {
     do {
          str->capacity*=2;
     } while(str->capacity < minimumNeeded);
 
-    str->ct=realloc(str->ct, str->capacity*sizeof(char));
+    str->ct = realloc(str->ct, str->capacity*sizeof(char));
 }
 
 
@@ -26,9 +39,11 @@ static void stringResize(String str, int minimumNeeded) {
 String stringNew() {
     String str=malloc(sizeof(struct _String));
 
-    str->length=0;
-    str->capacity=DEFSIZE;
-    str->ct=malloc(DEFSIZE*sizeof(char));
+    str->type = STRING;
+    str->length = 0;
+    str->capacity = DEFSIZE;
+    str->ct = malloc(DEFSIZE*sizeof(char));
+
     return str;
 }
 
@@ -38,39 +53,44 @@ void stringDel(String str) {
 }
 
 char *stringDelKeepCStr(String str) {
-    char *cstr = (char *)stringCStr(str);
+    char *cStr = (char *)stringCStr(str);
     free(str);
-    return cstr;
+    return cStr;
 }
 
-String stringSubString(String str, int start, int end) {
+
+
+String stringClone(String str) {
     String str2=malloc(sizeof(struct _String));
 
-    str2->length=end-start;
-
-    str2->capacity = DEFSIZE;
-    while(str2->capacity < end-start)
-         str2->capacity *= 2;
-
-    str2->ct=malloc(str2->capacity*sizeof(char));
-    memcpy(str2->ct, str->ct+start, str2->length*sizeof(char));
-
-    return str2;
-}
-
-String stringCopy(String str) {
-    String str2=malloc(sizeof(struct _String));
-
+    str2->type = STRING;
     str2->length = str->length;
     str2->capacity = str->capacity;
     str2->ct=malloc(str2->capacity*sizeof(char));
     memcpy(str2->ct, str->ct, str2->length*sizeof(char));
 
     return str2;
-    //return stringSubString(str, 0, str->length);
 }
 
-String stringTrim(String str, int start, int end) {
+String stringSubString(String str, int start, int end) {
+    String str2 = malloc(sizeof(struct _String));
+
+    str2->type = STRING;
+    str2->length = end-start;
+
+    str2->capacity = DEFSIZE;
+    while(str2->capacity < end-start)
+         str2->capacity *= 2;
+
+    str2->ct = malloc(str2->capacity*sizeof(char));
+    memcpy(str2->ct, str->ct+start, str2->length*sizeof(char));
+
+    return str2;
+}
+
+
+
+void stringTrim(String str, int start, int end) {
     if(start != 0) {
         char *ct = str->ct;
         for(int i=start, j=0; i<end; i++, j++)
@@ -78,17 +98,19 @@ String stringTrim(String str, int start, int end) {
     }
 
     str->length = end-start;
-
-    return str;
 }
 
 
 
-String stringClear(String str) {
-    str->length=0;
-    return str;
+void stringClear(String str) {
+    str->length = 0;
 }
 
+
+
+bool stringIsEmpty(String str) {
+    return str->length == 0;
+}
 
 int stringLength(String str) {
     return str->length;
@@ -105,8 +127,13 @@ const char *stringCStr(String str) {
     return str->ct;
 }
 
+char stringGet(String str, int pos) {
+    return str->ct[pos];
+}
 
-String stringAppend(String str, const char *cStr) {
+
+
+void stringAppend(String str, const char *cStr) {
     int cStrLen = strlen(cStr);
 
     if(str->capacity < str->length+cStrLen)
@@ -114,32 +141,26 @@ String stringAppend(String str, const char *cStr) {
 
     memcpy(str->ct+str->length*sizeof(char), cStr, cStrLen);
     str->length += cStrLen;
-
-    return str;
 }
 
-String stringAppendString(String str, const String str2) {
+void stringAppendString(String str, const String str2) {
     if(str->capacity < str->length+str2->length)
         stringResize(str, str->length+str2->length);
 
     memcpy(str->ct+str->length*sizeof(char), str2->ct, str2->length);
     str->length += str2->length;
-
-    return str;
 }
 
-String stringAppendChar(String str, const char c) {
+void stringAppendChar(String str, const char c) {
     if(str->capacity < str->length+1)
         stringResize(str, str->length+1);
 
     str->ct[str->length++] = c;
-
-    return str;
 }
 
 
 
-void stringHeap(String str) {
+void stringDump(String str) {
     int elts=stringLength(str);
     int effcost=elts*sizeof(char);
     int opcost=sizeof(struct _String);
