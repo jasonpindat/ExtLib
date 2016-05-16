@@ -1,3 +1,12 @@
+/**
+ * \file Array.c
+ * \author Jason Pindat
+ * \date 2016-05-16
+ *
+ * Copyright 2014-2016
+ *
+ */
+
 #include "Common.h"
 #include "Array.h"
 
@@ -7,13 +16,15 @@
 
 struct _Array {
     RealType type;
+    int elemSize;
     ElCopyFct copyFct;
     ElDelFct delFct;
+
     ElCmpFct cmpFct;
-    int length;
-    int size;
-    int elemSize;
     Ptr temp;
+    int length;
+
+    int size;
     Ptr ct;
 };
 
@@ -58,10 +69,13 @@ Array arrayNew(int elemSize) {
 
     a->copyFct = NULL;
     a->delFct = NULL;
-    a->length = 0;
-    a->size = DEFSIZE;
+
     a->temp = malloc(a->elemSize);
+    a->length = 0;
+
+    a->size = DEFSIZE;
     a->ct = malloc(DEFSIZE*a->elemSize);
+
     return a;
 }
 
@@ -75,13 +89,10 @@ void arrayDel(Array a) {
     free(a);
 }
 
+
+
 void arrayComparable(Array a, ElCmpFct fct) {
     a->cmpFct = fct;
-}
-
-void arrayElementCopy(Array a, ElCopyFct copyFct, ElDelFct delFct) {
-    a->copyFct = copyFct;
-    a->delFct = delFct;
 }
 
 
@@ -167,6 +178,10 @@ int arrayLastIndexOf(Array a, Ptr data) {
 
 
 
+Ptr arrayTop_base(Array a) {
+    return arrayGet_base(a, a->length-1);
+}
+
 Ptr arrayGet_base(Array a, int pos) {
     if(a->copyFct) {
         a->copyFct(a->ct + a->elemSize*pos, a->temp);
@@ -190,11 +205,11 @@ void arraySet_base(Array a, int pos, Ptr data) {
 
 
 
-void arrayAdd_base(Array a, Ptr data) {
-    arrayAddAt_base(a, a->length, data);
+void arrayPush_base(Array a, Ptr data) {
+    arrayAdd_base(a, a->length, data);
 }
 
-void arrayAddAt_base(Array a, int pos, Ptr data) {
+void arrayAdd_base(Array a, int pos, Ptr data) {
     if(a->length >= a->size)
         arrayResize(a);
 
@@ -210,18 +225,16 @@ void arrayAddAt_base(Array a, int pos, Ptr data) {
 
 
 
+void arrayPop(Array a) {
+    arrayRemove(a, a->length-1);
+}
+
 void arrayRemove(Array a, int pos) {
     if(a->delFct)
         a->delFct(a->ct + a->elemSize*pos);
 
     arrayUnshift(a, pos);
     a->length--;
-}
-
-void arrayRemoveElement(Array a, Ptr data) {
-    int index = arrayIndexOf(a, data);
-    if(index != -1)
-        arrayRemove(a, index);
 }
 
 
@@ -282,16 +295,76 @@ void arrayHeap(Array a) {
 }
 
 
+
 // Iteration
 
-bool arrayItExists(Iterator *it) {
-    return it->data.arrayData < arrayLength((Array)(it->col));
+ArrayIt arrayItNew(Array a) {
+    ArrayIt it;
+
+    it.array = a;
+    it.index = 0;
+
+    return it;
 }
 
-void arrayItNext(Iterator *it) {
-    it->data.arrayData++;
+ArrayIt arrayItNewBack(Array a) {
+    ArrayIt it;
+
+    it.array = a;
+    it.index = a->length-1;
+
+    return it;
 }
 
-Ptr arrayItGet(Iterator *it) {
-    return arrayGet_base((Array)(it->col), it->data.arrayData);
+
+
+bool arrayItExists(ArrayIt *it) {
+    return it->index >=0 && it->index < it->array->length;
+}
+
+
+
+void arrayItNext(ArrayIt *it) {
+    it->index++;
+}
+
+void arrayItPrev(ArrayIt *it) {
+    it->index--;
+}
+
+
+
+Ptr arrayItGet_base(ArrayIt *it) {
+    return arrayGet_base(it->array, it->index);
+}
+
+
+
+void arrayItSet_base(ArrayIt *it, Ptr data) {
+    arraySet_base(it->array, it->index, data);
+}
+
+
+
+void arrayItAddAfter_base(ArrayIt *it, Ptr data) {
+    arrayAdd_base(it->array, it->index+1, data);
+}
+
+void arrayItAddBefore_base(ArrayIt *it, Ptr data) {
+    arrayAdd_base(it->array, it->index, data);
+    it->index++;
+}
+
+
+
+void arrayItRemove(ArrayIt *it) {
+    arrayRemove(it->array, it->index);
+    it->index--;
+}
+
+
+
+void arrayForEach(Array a, ElActFct actFct, Ptr infos) {
+    for(int i=0; i<a->length; i++)
+        actFct(a->ct + i*a->elemSize, infos);
 }

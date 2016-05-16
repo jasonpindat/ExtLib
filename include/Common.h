@@ -2,8 +2,9 @@
  * \file Common.h
  * \brief Functions and types needed by ExtLib
  * \author Jason Pindat
- * \version 1.0
- * \date 05/21/2014
+ * \date 2016-05-16
+ *
+ * Copyright 2014-2016
  *
  */
 
@@ -17,8 +18,7 @@
 
 typedef enum {
     ARRAY,
-    SIMPLELIST,
-    DOUBLELIST
+    LIST
 } RealType;
 
 /** Ascendant sorting */
@@ -66,8 +66,11 @@ typedef int(*ElCmpFct)(Ptr elt1, Ptr elt2);
 /** ElCopyFct : A copy function. must take 2 generic pointers (Ptr) 1st to the source, 2nd to destination and return nothing */
 typedef void(*ElCopyFct)(Ptr src, Ptr dest);
 
-/** ElDelFct : A deletion function. must take 1 generic pointers (Ptr) to the object to delete and return nothing */
+/** ElDelFct : A deletion function. must take 1 generic pointer (Ptr) to the object to delete and return nothing */
 typedef void(*ElDelFct)(Ptr obj);
+
+/** ElActFct : An action function. must take 2 generic pointers (Ptr) 1st to an object, 2nd to additional informations sent by the caller and return nothing */
+typedef void(*ElActFct)(Ptr obj, Ptr infos);
 
 
 /* \brief Throws an error.

@@ -2,10 +2,11 @@
  * \file Array.h
  * \brief Primitives functions for arrays
  * \author Jason Pindat
- * \version 1.0
- * \date 05/21/2014
+ * \date 2016-05-16
  *
  * All the basic functions to manage dynamic one-dimention arrays.
+ *
+ * Copyright 2014-2016
  *
  */
 
@@ -13,7 +14,6 @@
 #define EXTLIB_ARRAY_H
 
 #include "Common.h"
-#include "Iterator.h"
 
 /** Array : type for an array. */
 typedef struct _Array *Array;
@@ -37,6 +37,7 @@ Array arrayNew(int elemSize);
 void arrayDel(Array a);
 
 
+
 /** \brief Sets the function to compare 2 elements of this array, note that if you declared the array with EL_*, the comparison function of the specified type is automatically linked.
  *
  * \param a : Array in which you set the fonction.
@@ -45,16 +46,6 @@ void arrayDel(Array a);
  *
  */
 void arrayComparable(Array a, ElCmpFct fct);
-
-/** \brief Sets the functions to copy an element and to delete an element of this array. If NULL or arrayElementCopy is not called, the elements will be copied bit by bit.
- *
- * \param a : Array in which you set the fonction.
- * \param copyFct : pointer to the copy function, the function must take 2 pointers, the first is the source element and the second is the new allocated element to initialize and return nothing.
- * \param delFct : pointer to the deletion function, the function must take a pointer to the element to destroy. Note that this pointer will be automatically freed, so delFct must'nt do this.
- * \return nothing.
- *
- */
-void arrayElementCopy(Array a, ElCopyFct copyFct, ElDelFct delFct);
 
 
 
@@ -146,6 +137,15 @@ int arrayLastIndexOf(Array a, Ptr data);
 
 
 
+/** \brief Returns the last element in an array.
+ *
+ * \param a : Array to seek in.
+ * \return Pointer to data.
+ *
+ */
+Ptr arrayTop_base(Array a);
+#define arrayTop(a, type) (*(type*)arrayTop_base(a))
+
 /** \brief Returns the element at a given position in an array.
  *
  * \param a : Array to seek in.
@@ -178,8 +178,8 @@ void arraySet_base(Array a, int pos, Ptr data);
  * \return nothing.
  *
  */
-void arrayAdd_base(Array a, Ptr data);
-#define arrayAdd(a, data) arrayAdd_base(a, &(data))
+void arrayPush_base(Array a, Ptr data);
+#define arrayPush(a, data) arrayPush_base(a, &(data))
 
 /** \brief Adds an element at a given position in an array (Not primitive).
  *
@@ -189,10 +189,18 @@ void arrayAdd_base(Array a, Ptr data);
  * \return nothing.
  *
  */
-void arrayAddAt_base(Array a, int pos, Ptr data);
-#define arrayAddAt(a, pos, data) arrayAddAt_base(a, pos, &(data))
+void arrayAdd_base(Array a, int pos, Ptr data);
+#define arrayAdd(a, pos, data) arrayAdd_base(a, pos, &(data))
 
 
+
+/** \brief Removes the last element in the array.
+ *
+ * \param a : Array to remove in.
+ * \return nothing.
+ *
+ */
+void arrayPop(Array a);
 
 /** \brief Removes the element at a given position in the array (Not primitive).
  *
@@ -202,15 +210,6 @@ void arrayAddAt_base(Array a, int pos, Ptr data);
  *
  */
 void arrayRemove(Array a, int pos);
-
-/** \brief Removes the first found occurrence of the element in the array (Not primitive), arrayComparable must have been called or the vector must have been created with a EL_* constant.
- *
- * \param a : Array to remove in.
- * \param data : Element to remove.
- * \return nothing.
- *
- */
-void arrayRemoveElement(Array a, Ptr data);
 
 
 
@@ -235,17 +234,133 @@ void arrayRandomize(Array a);
 
 /** \brief Details the heap usage of a given array
  *
- * \param a : Array to seek in.
+ * \param a : Array to dump.
  * \return nothing.
  *
  */
 void arrayHeap(Array a);
 
 
+
 // Iteration
 
-bool arrayItExists(Iterator *it);
-void arrayItNext(Iterator *it);
-Ptr arrayItGet(Iterator *it);
+typedef struct {
+    Array array;
+    int index;
+} ArrayIt;
+
+
+
+/** \brief Creates an iterator on the array (Starting with the first element).
+ *
+ * \param a : Array to iterate.
+ * \return Iterator on this array.
+ *
+ */
+ArrayIt arrayItNew(Array a);
+
+/** \brief Creates an iterator on the array (Starting with the last element).
+ *
+ * \param a : Array to iterate.
+ * \return Iterator on this array.
+ *
+ */
+ArrayIt arrayItNewBack(Array a);
+
+
+
+/** \brief Determines whether the element pointed by the iterator exists or it is the end of the iteration
+ *
+ * \param it : Iterator on an array.
+ * \return true if element exists, false otherwise.
+ *
+ */
+bool arrayItExists(ArrayIt *it);
+
+
+
+/** \brief Positions the iterator on the next element
+ *
+ * \param it : Iterator on an array.
+ * \return nothing.
+ *
+ */
+void arrayItNext(ArrayIt *it);
+
+/** \brief Positions the iterator on the previous element
+ *
+ * \param it : Iterator on an array.
+ * \return nothing.
+ *
+ */
+void arrayItPrev(ArrayIt *it);
+
+
+
+/** \brief Returns the element pointed by the iterator
+ *
+ * \param it : Iterator on an array.
+ * \return element.
+ *
+ */
+Ptr arrayItGet_base(ArrayIt *it);
+#define arrayItGet(it, type) (*(type*)arrayItGet_base(it))
+
+
+
+/** \brief Updates the element pointed by the iterator
+ *
+ * \param it : Iterator on an array.
+ * \return nothing.
+ *
+ */
+void arrayItSet_base(ArrayIt *it, Ptr data);
+#define arrayItSet(it, data) arrayItSet_base(it, &(data))
+
+
+
+/** \brief Adds a new element after the position pointed by the iterator.
+ *
+ * \param it : Iterator on an array.
+ * \param data : Pointer to the data to add.
+ * \return nothing.
+ *
+ */
+void arrayItAddAfter_base(ArrayIt *it, Ptr data);
+/** Automatic macro to send the address of data to arrayItAddAfter_base */
+#define arrayItAddAfter(it, data) arrayItAddAfter_base(it, &(data))
+
+/** \brief Adds a new element before the position pointed by the iterator.
+ *
+ * \param it : Iterator on an array.
+ * \param data : Pointer to the data to add.
+ * \return nothing.
+ *
+ */
+void arrayItAddBefore_base(ArrayIt *it, Ptr data);
+/** Automatic macro to send the address of data to arrayItAddBefore_base */
+#define arrayItAddBefore(it, data) arrayItAddBefore_base(it, &(data))
+
+
+
+/** \brief Removes the element pointed by the iterator.
+ *
+ * \param it : Iterator on an array.
+ * \return nothing.
+ *
+ */
+void arrayItRemove(ArrayIt *it);
+
+
+
+/** \brief makes an action for every element of the array
+ *
+ * \param a : Array to iterate.
+ * \param actFct : Pointer to a function called for each element of the array.
+ * \param infos : pointer broadcasted to actFct. Useful to share additional informations to the function.
+ * \return nothing.
+ *
+ */
+void arrayForEach(Array a, ElActFct actFct, Ptr infos);
 
 #endif

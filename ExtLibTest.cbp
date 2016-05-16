@@ -18,24 +18,28 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add directory="include" />
 		</Compiler>
-		<Unit filename="Array.c">
+		<Unit filename="include/Array.h" />
+		<Unit filename="include/Collection.h" />
+		<Unit filename="include/Common.h" />
+		<Unit filename="include/Iterable.h" />
+		<Unit filename="include/List.h" />
+		<Unit filename="src/Array.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Array.h" />
-		<Unit filename="Common.c">
+		<Unit filename="src/Collection.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Common.h" />
-		<Unit filename="Iterable.h" />
-		<Unit filename="Iterator.c">
+		<Unit filename="src/Common.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="Iterator.h" />
-		<Unit filename="List.c">
+		<Unit filename="src/Iterable.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="List.h" />
+		<Unit filename="src/List.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="testArray.c">
 			<Option compilerVar="CC" />
 		</Unit>

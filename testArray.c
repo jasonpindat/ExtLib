@@ -1,6 +1,8 @@
 
+#include "Collection.h"
 #include "Array.h"
-#include "Iterator.h"
+
+#include <time.h>
 
 void testArray1() {
     int nb=100;
@@ -13,7 +15,7 @@ void testArray1() {
         vals[i]=(short)i;
 
     for(int i=0; i<nb; i++)
-        arrayAdd(a, vals[i]);
+        arrayPush(a, vals[i]);
 
     free(vals);
 
@@ -41,16 +43,25 @@ void testArray1() {
     arrayDel(a);
 }
 
+void printElement(int *elt, Ptr infos) {
+    printf("%d\n", *elt);
+}
+
 void testArrayIt() {
     Array a = arrayNew(sizeof(int));
 
     for(int i=0; i<20; i++) {
-        arrayAdd(a, i);
+        arrayPush(a, i);
     }
 
-    for(Iterator it = itNew((Iterable)a); itExists(&it); itNext(&it)) {
-        printf("%d\n", itGet(&it, int));
+    for(ArrayIt it = arrayItNew(a); arrayItExists(&it); arrayItNext(&it)) {
+        printf("%d\n", arrayItGet(&it, int));
     }
+
+    for(int i=0; i<arrayLength(a); i++)
+        printf("%d\n", arrayGet(a, i, int));
+
+    arrayForEach(a, (ElActFct)printElement, NULL);
 
     arrayDel(a);
 }
@@ -68,21 +79,25 @@ void delTest(struct test *elt) {
     free(elt->nb);
 }
 
-int main() {
+void testArrayCopy() {
     Array a = arrayNew(sizeof(struct test));
-    arrayElementCopy(a, copyTest, delTest);
+    collectionElementInstanciable((Collection)a, (ElCopyFct)copyTest, (ElDelFct)delTest);
 
     struct test t;
     t.nb = malloc(sizeof(int));
     *(t.nb) = 5;
 
-    arrayAdd(a, t);
+    arrayPush(a, t);
 
     struct test t2 = arrayGet(a, 0, struct test);
 
     arrayDel(a);
 
     printf("%d\n", *(t2.nb));
+}
+
+int main() {
+    testArrayIt();
 
     return EXIT_SUCCESS;
 }

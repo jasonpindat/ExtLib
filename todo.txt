@@ -16,4 +16,4 @@ Skip list
 
 --
 
-Continuer List.c et List.h puis enchainer sur SimpleList et DoubleList etc...
+Tests List avant de continuer
