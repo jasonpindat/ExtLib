@@ -49,3 +49,4 @@ Temporary Items
 *.o
 ExtLibTest.depend
 ExtLibTest.layout
+*.a
