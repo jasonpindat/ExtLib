@@ -53,6 +53,7 @@
 		<Unit filename="testArray.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="todo.txt" />
 		<Extensions>
 			<code_completion />
 			<envvars />

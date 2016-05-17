@@ -275,6 +275,7 @@ void listSort(List l, int method) {
     ElCmpFct fct=l->cmpFct;
     int listSize=1, numMerges, leftSize, rightSize;
     ListNode tail, left, right, next;
+
     if (first && first->next) {
         do { // For each power of two<=list length
             numMerges=0,left=first;
@@ -304,7 +305,7 @@ void listSort(List l, int method) {
             tail->next=0,listSize<<=1;
         } while (numMerges>1); // If we only did one merge, then we just sorted the whole list.
         l->first=first;
-        l->last=tail;
+        l->last=tail; // Optional
     }
 }
 
@@ -313,7 +314,7 @@ void listSort(List l, int method) {
 void listDump(List l) {
     int elts = l->length;
     int effcost = elts*l->elemSize;
-    int opcost = sizeof(struct _List)+elts * sizeof(struct _ListNode);
+    int opcost = sizeof(struct _List) + elts*sizeof(struct _ListNode);
 
     printf("Doubly-linked list at %p\n", l);
     printf("\t%d elements, each using %d bytes\n", elts, l->elemSize);

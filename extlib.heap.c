@@ -52,7 +52,6 @@ void heapPush_base(Heap h, Ptr value)
 	{
 		h->size <<= 1;
 		h->data = realloc(h->data, h->elemSize * h->size);
-		if (!h->data) {printf("b");exit(1);} // Exit if the memory allocation fails
 	}
 
 	// Find out where to put the element and put it

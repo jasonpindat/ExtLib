@@ -35,7 +35,7 @@ struct _SimpleListNode {
 
 
 SimpleList simpleListNew(int elemSize) {
-    SimpleList l = malloc(sizeof(struct _Sll));
+    SimpleList l = malloc(sizeof(struct _SimpleList));
 
     l->type = SIMPLELIST;
 
@@ -73,8 +73,8 @@ void simpleListComparable(SimpleList l, ElCmpFct fct) {
 
 
 
-SimpleList simpleListClone(Simple l) {
-    SimpleList l2 = listNew(l->elemSize);
+SimpleList simpleListClone(SimpleList l) {
+    SimpleList l2 = simpleListNew(l->elemSize);
 
     l2->cmpFct = l->cmpFct;
     l2->copyFct = l->copyFct;
@@ -91,7 +91,7 @@ SimpleList simpleListClone(Simple l) {
             first = false;
         }
         else {
-            simpleListItAddAfter(&it);
+            simpleListItAddAfter_base(&it, node->data);
             simpleListItNext(&it);
         }
 
@@ -147,223 +147,212 @@ bool simpleListContains(SimpleList l, Ptr data) {
 
 
 
-SllNode sllGetFront(Sll list) {
-    return list->first;
-}
-
-SllNode sllGetNext(SllNode node) {
-    return node->next;
-}
-
-SllNode sllGetBack(Sll list) {
-    SllNode node = list->first;
-
-    if(!node)
-        return NULL;
-
-    while(node->next)
-        node=node->next;
-
-    return node;
-}
-
-SllNode sllGetAt(Sll list, int pos) {
-    SllNode node = list->first;
-
-    if(!node)
-        return NULL;
-
-    for(int i=0; i<pos; i++) {
-        node=node->next;
-        if(!node)
-            return NULL;
+Ptr simpleListGetFirst_base(SimpleList l) {
+    if(l->copyFct) {
+        l->copyFct(l->temp, l->first->data);
+        return l->temp;
     }
-
-    return node;
-}
-
-
-
-SllNode sllSetFront_base(Sll list, Ptr data) {
-    SllNode node = list->first;
-
-    memcpy(node->data, data, list->elemSize);
-
-    return node;
-}
-
-SllNode sllSetNode_base(Sll list, SllNode node, Ptr data) {
-    memcpy(node->data, data, list->elemSize);
-
-    return node;
-}
-
-SllNode sllSetBack_base(Sll list, Ptr data) {
-    SllNode node = sllGetBack(list);
-
-    sllSetNode(list, node, data);
-
-    return node;
-}
-
-SllNode sllSetAt_base(Sll list, int pos, Ptr data) {
-    SllNode node = sllGetAt(list, pos);
-
-    sllSetNode(list, node, data);
-
-    return node;
-}
-
-
-
-SllNode sllPushFront_base(Sll list, Ptr data) {
-    SllNode newnode = malloc(sizeof(struct _SllNode));
-
-    newnode->next=list->first;
-    list->first=newnode;
-
-    newnode->data=malloc(list->elemSize);
-    memcpy(newnode->data, data, list->elemSize);
-
-    //newnode->data=data;
-
-    return newnode;
-}
-
-SllNode sllPushAfter_base(Sll list, SllNode node, Ptr data) {
-    SllNode newnode = malloc(sizeof(struct _SllNode));
-
-    newnode->next=node->next;
-    node->next=newnode;
-
-    newnode->data=malloc(list->elemSize);
-    memcpy(newnode->data, data, list->elemSize);
-
-    //newnode->data=data;
-
-    return newnode;
-}
-
-SllNode sllPushBack_base(Sll list, Ptr data) {
-    if(!list->first)
-        return sllPushFront(list, data);
     else
-        return sllPushAfter(list, sllGetBack(list), data);
-}
-
-SllNode sllPushAt_base(Sll list, int pos, Ptr data) {
-    if(pos==0)
-        return sllPushFront(list, data);
-
-    //SllNode node = sllGetAt(list, pos-1);
-
-    /*if(!node)
-        throwExc("ExtLib.Sll.sllAddAt", "Given position is out of bounds.");*/
-
-    return sllPushAfter(list, sllGetAt(list, pos-1), data);
+        return l->first->data;
 }
 
 
 
-Sll sllPopFront(Sll list) {
-    SllNode oldnode = list->first;
+void simpleListSetFirst_base(SimpleList l, Ptr data) {
+    if(l->delFct)
+        l->delFct(l->first->data);
 
-    list->first=oldnode->next;
-
-    free(oldnode->data);
-    free(oldnode);
-
-    return list;
-}
-
-SllNode sllPopAfter(SllNode node) {
-    SllNode oldnode = node->next;
-
-    node->next=oldnode->next;
-
-    free(oldnode->data);
-    free(oldnode);
-
-    return node;
-}
-
-Sll sllPopBack(Sll list) {
-    if(!list->first->next)
-        sllPopFront(list);
-    else {
-        SllNode node = list->first->next;
-        SllNode nodeb = list->first;
-
-        while(node->next) {
-            nodeb=node;
-            node=node->next;
-        }
-
-        sllPopAfter(nodeb);
-    }
-
-    return list;
-}
-
-Sll sllPopAt(Sll list, int pos) {
-    if(pos==0)
-        return sllPopFront(list);
-
-    sllPopAfter(sllGetAt(list, pos-1));
-
-    return list;
+    if(l->copyFct)
+        l->copyFct(l->first->data, data);
+    else
+        memcpy(l->first->data, data, l->elemSize);
 }
 
 
 
-Sll sllSort(Sll list, int method) {
-    SllNode first=list->first;
-    ElCmpFct fct=list->cmpFct;
+void simpleListAddFirst_base(SimpleList l, Ptr data) {
+    void *memory = malloc(sizeof(struct _SimpleListNode) + l->elemSize);
+
+    SimpleListNode node = memory;
+
+    node->next = l->first;
+    l->first = node;
+
+    node->data = memory + sizeof(struct _SimpleListNode);
+
+    if(l->copyFct)
+        l->copyFct(node->data, data);
+    else
+        memcpy(node->data, data, l->elemSize);
+
+    l->length++;
+}
+
+
+
+void simpleListRemoveFirst(SimpleList l) {
+    SimpleListNode node = l->first;
+
+    l->first = node->next;
+
+    if(l->delFct)
+        l->delFct(node->data);
+
+    free(node);
+
+    l->length--;
+}
+
+
+
+void simpleListSort(SimpleList l, int method) {
+    SimpleListNode first=l->first;
+    ElCmpFct fct=l->cmpFct;
     int listSize=1, numMerges, leftSize, rightSize;
-    SllNode tail, left, right, next;
-    if (!first || !first->next) return list;  // Trivial case
+    SimpleListNode tail, left, right, next;
 
-    do { // For each power of two<=list length
-        numMerges=0,left=first;
-        tail=first=0; // Start at the start
+    if (first && first->next) {
+        do { // For each power of two<=list length
+            numMerges=0,left=first;
+            tail=first=0; // Start at the start
 
-        while (left) { // Do this list_len/listSize times:
-            numMerges++,right=left,leftSize=0,rightSize=listSize;
-            // Cut list into two halves (but don't overrun)
-            while (right && leftSize<listSize) leftSize++,right=right->next;
-            // Run through the lists appending onto what we have so far.
-            while (leftSize>0 || (rightSize>0 && right)) {
-                // Left empty, take right OR Right empty, take left, OR compare.
-                if (!leftSize)                  {next=right;right=right->next;rightSize--;}
-                else if (!rightSize || !right)  {next=left;left=left->next;leftSize--;}
-                else if (method*fct(left->data,right->data)<0)     {next=left;left=left->next;leftSize--;}
-                else                            {next=right;right=right->next;rightSize--;}
-                // Update pointers to keep track of where we are:
-                if (tail) tail->next=next;  else first=next;
-                // Sort prev pointer
-                //next->prev=tail; // Optional.
-                tail=next;
+            while (left) { // Do this list_len/listSize times:
+                numMerges++,right=left,leftSize=0,rightSize=listSize;
+                // Cut list into two halves (but don't overrun)
+                while (right && leftSize<listSize) leftSize++,right=right->next;
+                // Run through the lists appending onto what we have so far.
+                while (leftSize>0 || (rightSize>0 && right)) {
+                    // Left empty, take right OR Right empty, take left, OR compare.
+                    if (!leftSize)                  {next=right;right=right->next;rightSize--;}
+                    else if (!rightSize || !right)  {next=left;left=left->next;leftSize--;}
+                    else if (method*fct(left->data,right->data)<0)     {next=left;left=left->next;leftSize--;}
+                    else                            {next=right;right=right->next;rightSize--;}
+                    // Update pointers to keep track of where we are:
+                    if (tail) tail->next=next;  else first=next;
+                    // Sort prev pointer
+                    //next->prev=tail; // Optional.
+                    tail=next;
+                }
+                // Right is now AFTER the list we just sorted, so start the next sort there.
+                left=right;
             }
-            // Right is now AFTER the list we just sorted, so start the next sort there.
-            left=right;
-        }
-        // Terminate the list, double the list-sort size.
-        tail->next=0,listSize<<=1;
-    } while (numMerges>1); // If we only did one merge, then we just sorted the whole list.
-    list->first=first;
-    return list;
+            // Terminate the list, double the list-sort size.
+            tail->next=0,listSize<<=1;
+        } while (numMerges>1); // If we only did one merge, then we just sorted the whole list.
+        l->first=first;
+        //l->last=tail; // Optional
+    }
 }
 
 
 
-void sllHeap(Sll list) {
-    int elts=sllCount(list);
-    int effcost=elts*list->elemSize;
-    int opcost=sizeof(struct _Sll)+elts*sizeof(struct _SllNode);
+void simpleListDump(SimpleList l) {
+    int elts = l->length;
+    int effcost = elts*l->elemSize;
+    int opcost = sizeof(struct _SimpleList) + elts*sizeof(struct _SimpleListNode);
 
-    printf("Singly-linked list at %p\n", list);
-    printf("\t%d elements, each using %d bytes\n", elts, list->elemSize);
+    printf("Singly-linked list at %p\n", l);
+    printf("\t%d elements, each using %d bytes\n", elts, l->elemSize);
     printf("\t%d bytes used for elemets\n", effcost);
     printf("\t%d bytes used as operating cost\n", opcost);
     printf("\t%d bytes total used\n", opcost+effcost);
+}
+
+
+
+// Iteration
+
+SimpleListIt simpleListItNew(SimpleList l) {
+    SimpleListIt it;
+
+    it.list = l;
+    it.prevNode = NULL;
+    it.node = l->first;
+
+    return it;
+}
+
+
+
+bool simpleListItExists(SimpleListIt *it) {
+    return it->node != NULL;
+}
+
+
+
+void simpleListItNext(SimpleListIt *it) {
+    it->prevNode = it->node;
+    it->node = it->node->next;
+}
+
+
+
+Ptr simpleListItGet_base(SimpleListIt *it) {
+    if(it->list->copyFct) {
+        it->list->copyFct(it->list->temp, it->node->data);
+        return it->list->temp;
+    }
+    else
+        return it->node->data;
+}
+
+
+
+void simpleListItSet_base(SimpleListIt *it, Ptr data) {
+    if(it->list->delFct)
+        it->list->delFct(it->node->data);
+
+    if(it->list->copyFct)
+        it->list->copyFct(it->node->data, data);
+    else
+        memcpy(it->node->data, data, it->list->elemSize);
+}
+
+
+
+void simpleListItAddAfter_base(SimpleListIt *it, Ptr data) {
+    void *memory = malloc(sizeof(struct _SimpleListNode) + it->list->elemSize);
+
+    SimpleListNode newnode = memory;
+
+    newnode->next = it->node->next;
+    it->node->next = newnode;
+
+    newnode->data = memory + sizeof(struct _SimpleListNode);
+
+    if(it->list->copyFct)
+        it->list->copyFct(newnode->data, data);
+    else
+        memcpy(newnode->data, data, it->list->elemSize);
+
+    it->list->length++;
+}
+
+
+
+void simpleListItRemove(SimpleListIt *it) {
+    SimpleListNode node = it->node;
+
+    if(it->prevNode)
+        it->prevNode->next = node->next;
+    else
+        it->list->first = node->next;
+
+    it->node = node->next;
+
+    if(it->list->delFct)
+        it->list->delFct(node->data);
+
+    free(node);
+}
+
+
+
+void simpleListForEach(SimpleList l, ElActFct actFct, Ptr infos) {
+    SimpleListNode node = l->first;
+
+    while(node) {
+        actFct(node->data, infos);
+        node = node->next;
+    }
 }

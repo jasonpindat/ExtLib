@@ -24,6 +24,8 @@ static ForEachFct getForEachFct(Collection c) {
     switch(collectionGetType(c)) {
     case ARRAY:
         return (ForEachFct)arrayForEach;
+    case SIMPLELIST:
+        return (ForEachFct)simpleListForEach;
     case LIST:
         return (ForEachFct)listForEach;
     case STRING:
@@ -33,10 +35,24 @@ static ForEachFct getForEachFct(Collection c) {
     }
 }
 
-
+typedef struct {
+    SimpleList list;
+    SimpleListIt it;
+} SimpleListAddData;
 
 static void toArrayAddElt(Ptr obj, Array a) {
     arrayPush_base(a, obj);
+}
+
+static void toSimpleListAddElt(Ptr obj, SimpleListAddData *data) {
+    if(simpleListGetFirst_base(data->list)) {
+        simpleListAddFirst_base(data->list, obj);
+        data->it = simpleListItNew(data->list);
+    }
+    else {
+        simpleListItAddAfter_base(&(data->it), obj);
+        simpleListItNext(&(data->it));
+    }
 }
 
 static void toListAddElt(Ptr obj, List l) {
@@ -47,6 +63,8 @@ static ElActFct getAddFct(Collection c) {
     switch(collectionGetType(c)) {
     case ARRAY:
         return (ElActFct)toArrayAddElt;
+    case SIMPLELIST:
+        return (ElActFct)toSimpleListAddElt;
     case LIST:
         return (ElActFct)toListAddElt;
     default:
@@ -65,6 +83,15 @@ Array toArray(Collection src) {
     return a;
 }
 
+SimpleList toSimpleList(Collection src) {
+    SimpleList l = simpleListNew(collectionGetElemSize(src));
+    collectionElementInstanciable((Collection)l, collectionGetCopyFunction(src), collectionGetDelFunction(src));
+
+    collectionAddAll((Collection)l, src);
+
+    return l;
+}
+
 List toList(Collection src) {
     List l = listNew(collectionGetElemSize(src));
     collectionElementInstanciable((Collection)l, collectionGetCopyFunction(src), collectionGetDelFunction(src));
@@ -79,15 +106,36 @@ List toList(Collection src) {
 void collectionAddAll(Collection dest, Collection src) {
     ForEachFct forEachFct = getForEachFct(src);
     ElActFct addFct = getAddFct(dest);
-    forEachFct(src, addFct, dest);
+
+    SimpleListAddData simpleListAddData;
+    Ptr data;
+
+    if(collectionInstanceOf(dest, SIMPLELIST)) {
+        simpleListAddData.list = (SimpleList)dest;
+        data = &simpleListAddData;
+    }
+    else
+        data = dest;
+
+    forEachFct(src, addFct, data);
 }
 
 
 
-void collectionAddRaw(Collection dest, Ptr data, int nbElements) {
+void collectionAddRaw(Collection dest, Ptr rawData, int nbElements) {
     ElActFct addFct = getAddFct(dest);
     int elemSize = collectionGetElemSize(dest);
 
+    SimpleListAddData simpleListAddData;
+    Ptr data;
+
+    if(collectionInstanceOf(dest, SIMPLELIST)) {
+        simpleListAddData.list = (SimpleList)dest;
+        data = &simpleListAddData;
+    }
+    else
+        data = dest;
+
     for(int i=0; i<nbElements; i++)
-        addFct(data + i*elemSize, dest);
+        addFct(rawData + i*elemSize, data);
 }

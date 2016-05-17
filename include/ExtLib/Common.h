@@ -15,6 +15,7 @@
 
 typedef enum {
     ARRAY,
+    SIMPLELIST,
     LIST,
     STRING
 } RealType;

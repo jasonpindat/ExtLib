@@ -144,7 +144,7 @@ void simpleListAddFirst_base(SimpleList l, Ptr data);
  * \return nothing.
  *
  */
-void simpleListRemoveFirst(List l);
+void simpleListRemoveFirst(SimpleList l);
 
 
 

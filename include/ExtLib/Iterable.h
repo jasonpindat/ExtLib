@@ -14,6 +14,7 @@
 #include "Common.h"
 #include "Collection.h"
 #include "Array.h"
+#include "SimpleList.h"
 #include "List.h"
 
 /** \brief Returns a new array containing all the elements of the collection. The copy and delete functions are forwarded to the array.
@@ -24,10 +25,18 @@
  */
 Array toArray(Collection src);
 
-/** \brief Returns a new list containing all the elements of the collection. The copy and delete functions are forwarded to the list.
+/** \brief Returns a new singly-linked list containing all the elements of the collection. The copy and delete functions are forwarded to the list.
  *
  * \param src : collection.
- * \return a list.
+ * \return a singly-linked list.
+ *
+ */
+SimpleList toSimpleList(Collection src);
+
+/** \brief Returns a new doubly-linked list containing all the elements of the collection. The copy and delete functions are forwarded to the list.
+ *
+ * \param src : collection.
+ * \return a doubly-linked list.
  *
  */
 List toList(Collection src);
@@ -48,11 +57,11 @@ void collectionAddAll(Collection dest, Collection src);
 /** \brief Adds all the elements from data which is a contiguous array of nbElements elements to dest.
  *
  * \param dest : destination collection.
- * \param data : source array.
+ * \param rawData : source array.
  * \param nbElements : number of elements in data.
  * \return nothing.
  *
  */
-void collectionAddRaw(Collection dest, Ptr data, int nbElements);
+void collectionAddRaw(Collection dest, Ptr rawData, int nbElements);
 
 #endif
