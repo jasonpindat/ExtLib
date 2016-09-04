@@ -47,6 +47,15 @@ void arrayDel(Array a);
  */
 void arrayComparable(Array a, ElCmpFct fct);
 
+/** \brief Sets whether the array can be accessed for reading by multiple threads.
+ *
+ * \param a : Array.
+ * \param multithread : boolean value to allow multithreaded access.
+ * \return nothing.
+ *
+ */
+void arrayMultithread(Array a, bool multithread);
+
 
 
 /** \brief Copies an array and all its content.
@@ -141,7 +150,7 @@ int arrayLastIndexOf(Array a, Ptr data);
  *
  * \param a : Array to seek in.
  * \param pos : Position of the element, 0 is start.
- * \return Pointer to data.
+ * \return Pointer to data. /!\ Don't use the macro if multithreaded : the pointer returned needs a free.
  *
  */
 Ptr arrayGet_base(Array a, int pos);

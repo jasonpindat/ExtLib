@@ -123,6 +123,17 @@ char stringGet(String str, int pos);
 
 
 
+/** \brief Returns the position of a pattern in a string, if not found, returns -1
+ *
+ * \param str : a string.
+ * \param pattern : A C string seeked in the function.
+ * \return the position of pattern in str.
+ *
+ */
+int stringIndexOf(String str, const char *pattern, int from);
+
+
+
 /** \brief Appends a C string to a string.
  *
  * \param str : a string.

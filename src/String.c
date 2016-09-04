@@ -136,6 +136,19 @@ char stringGet(String str, int pos) {
 
 
 
+int stringIndexOf(String str, const char *pattern, int from) {
+    int patternLength = strlen(pattern);
+
+    for(int i=from; i<=str->length-patternLength; i++) {
+        if(strncmp(str->ct+i, pattern, patternLength) == 0)
+            return i;
+    }
+
+    return -1;
+}
+
+
+
 void stringAppend(String str, const char *cStr) {
     int cStrLen = strlen(cStr);
 
@@ -171,7 +184,7 @@ void stringDump(String str) {
 
     printf("String at %p\n", str);
     printf("\t%d characters\n", elts);
-    printf("\t%d bytes used for elemets\n", effcost);
+    printf("\t%d bytes used for elements\n", effcost);
     printf("\t%d bytes used as operating cost\n", opcost);
     printf("\t%d bytes used as preallocated\n", preallcost);
     printf("\t%d bytes total used\n", effcost+opcost+preallcost);

@@ -17,6 +17,9 @@ Skip list
 --
 
 Test List, test String a faire
-Ajouter indexOf a String
+String : indexOf à tester
+
 SimpleList.h fait
 Continuer SimpleList.c après simpleListContains
+
+Tester Multithread en lecture (Array, List et SimpleList)

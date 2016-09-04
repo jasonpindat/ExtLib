@@ -50,6 +50,15 @@ void listDel(List l);
  */
 void listComparable(List l, ElCmpFct fct);
 
+/** \brief Sets whether the list can be accessed for reading by multiple threads.
+ *
+ * \param l : List.
+ * \param multithread : boolean value to allow multithreaded access.
+ * \return nothing.
+ *
+ */
+void listMultithread(List l, bool multithread);
+
 
 
 /** \brief Copies a list and all its content.

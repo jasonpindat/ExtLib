@@ -20,9 +20,9 @@ struct _SimpleList {
     ElCopyFct copyFct;
     ElDelFct delFct;
 
+    int length;
     ElCmpFct cmpFct;
     Ptr temp;
-    int length;
 
     SimpleListNode first;
 };
@@ -69,6 +69,19 @@ void simpleListDel(SimpleList l) {
 
 void simpleListComparable(SimpleList l, ElCmpFct fct) {
     l->cmpFct = fct;
+}
+
+void simpleListMultithread(SimpleList l, bool multithread) {
+    if(multithread) {
+        if(l->temp) {
+            free(l->temp);
+            l->temp = NULL;
+        }
+    }
+    else {
+        if(!l->temp)
+            l->temp = malloc(l->elemSize);
+    }
 }
 
 
@@ -149,8 +162,15 @@ bool simpleListContains(SimpleList l, Ptr data) {
 
 Ptr simpleListGetFirst_base(SimpleList l) {
     if(l->copyFct) {
-        l->copyFct(l->temp, l->first->data);
-        return l->temp;
+        if(!l->temp) {
+            Ptr temp = malloc(l->elemSize);
+            l->copyFct(temp, l->first->data);
+            return temp;
+        }
+        else {
+            l->copyFct(l->temp, l->first->data);
+            return l->temp;
+        }
     }
     else
         return l->first->data;
@@ -253,7 +273,7 @@ void simpleListDump(SimpleList l) {
 
     printf("Singly-linked list at %p\n", l);
     printf("\t%d elements, each using %d bytes\n", elts, l->elemSize);
-    printf("\t%d bytes used for elemets\n", effcost);
+    printf("\t%d bytes used for elements\n", effcost);
     printf("\t%d bytes used as operating cost\n", opcost);
     printf("\t%d bytes total used\n", opcost+effcost);
 }
@@ -289,8 +309,15 @@ void simpleListItNext(SimpleListIt *it) {
 
 Ptr simpleListItGet_base(SimpleListIt *it) {
     if(it->list->copyFct) {
-        it->list->copyFct(it->list->temp, it->node->data);
-        return it->list->temp;
+        if(!it->list->temp) {
+            Ptr temp = malloc(it->list->elemSize);
+            it->list->copyFct(temp, it->node->data);
+            return temp;
+        }
+        else {
+            it->list->copyFct(it->list->temp, it->node->data);
+            return it->list->temp;
+        }
     }
     else
         return it->node->data;

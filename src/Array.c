@@ -23,9 +23,11 @@ struct _Array {
     ElCopyFct copyFct;
     ElDelFct delFct;
 
+    int length;
     ElCmpFct cmpFct;
     Ptr temp;
-    int length;
+
+    bool multithread;
 
     int size;
     Ptr ct;
@@ -96,6 +98,10 @@ void arrayDel(Array a) {
 
 void arrayComparable(Array a, ElCmpFct fct) {
     a->cmpFct = fct;
+}
+
+void arrayMultithread(Array a, bool multithread) {
+    a->multithread = multithread;
 }
 
 
@@ -183,8 +189,15 @@ int arrayLastIndexOf(Array a, Ptr data) {
 
 Ptr arrayGet_base(Array a, int pos) {
     if(a->copyFct) {
-        a->copyFct(a->temp, a->ct + a->elemSize*pos);
-        return a->temp;
+        if(a->multithread) {
+            Ptr temp = malloc(a->elemSize);
+            a->copyFct(temp, a->ct + a->elemSize*pos);
+            return temp;
+        }
+        else {
+            a->copyFct(a->temp, a->ct + a->elemSize*pos);
+            return a->temp;
+        }
     }
     else
         return a->ct + a->elemSize*pos;

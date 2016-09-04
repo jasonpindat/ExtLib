@@ -17,17 +17,18 @@
 typedef List Queue;
 
 
-#define queueNew(elemSize)  listNew(elemSize)
-#define queueDel(q)         listDel(q)
-#define queueClone(q)       listClone(q)
+#define queueNew(elemSize)                  listNew(elemSize)
+#define queueDel(q)                         listDel(q)
+#define queueMultithread(q, multithread)    listMultithread(q, multithread)
+#define queueClone(q)                       listClone(q)
 
-#define queueClear(q)       listClear(q)
-#define queueIsEmpty(q)     listIsEmpty(q)
+#define queueClear(q)                       listClear(q)
+#define queueIsEmpty(q)                     listIsEmpty(q)
 
-#define queueGet(q, type)   listGetFirst(q, type)
-#define queueAdd(q, data)   listAddLast(q, data)
-#define queueRemove(q)      listRemoveFirst(q)
+#define queueGet(q, type)                   listGetFirst(q, type)
+#define queueAdd(q, data)                   listAddLast(q, data)
+#define queueRemove(q)                      listRemoveFirst(q)
 
-#define queueDump(q)        listDump(q)
+#define queueDump(q)                        listDump(q)
 
 #endif
