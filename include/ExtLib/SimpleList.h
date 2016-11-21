@@ -57,7 +57,7 @@ void simpleListComparable(SimpleList l, ElCmpFct fct);
  * \return nothing.
  *
  */
-void listMultithread(List l, bool multithread);
+void simpleListMultithread(SimpleList l, bool multithread);
 
 
 

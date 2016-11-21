@@ -23,6 +23,7 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c99" />
 			<Add directory="include" />
 		</Compiler>
 		<Unit filename="include/ExtLib/Array.h" />

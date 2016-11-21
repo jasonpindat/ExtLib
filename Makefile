@@ -1,3 +1,5 @@
+CC=gcc 
+CFLAGS=-Iinclude -std=c99
 
 # General rule
 
@@ -19,27 +21,35 @@ dist:
 # Includes
 
 distinclude: dist
-	mkdir -p dist/include
-	cp *.h dist/include
+	mkdir -p dist/include/ExtLib
+	cp include/ExtLib/*.h dist/include/ExtLib
 
 
 # Sources
 
 distsrc: dist
 	mkdir -p dist/src
-	cp *.c dist/src
-	rm dist/src/main.c dist/src/test.c
+	cp src/*.c dist/src
+
+
+# Compilation
+
+objdir:
+	mkdir -p obj
+
+obj/%.o:src/%.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 
 # Library
 
-dist/lib/extlib.a: obj/extlib.def.o obj/extlib.dll.o obj/extlib.sll.o obj/extlib.vect.o obj/extlib.string.o obj/extlib.heap.o
+dist/lib/libextlib.a: obj/Array.o obj/Collection.o obj/Common.o obj/Iterable.o obj/List.o obj/SimpleList.o obj/String.o
 	ar -rv $@ $^
 
 distlib: dist
 	mkdir -p dist/lib
 
-distlibrary: distlib dist/lib/extlib.a
+distlibrary: distlib objdir dist/lib/libextlib.a
 
 
 # Distribution version
@@ -52,8 +62,8 @@ distrib: doc distinclude distsrc distlibrary
 # Clean
 
 clean:
-	rm -r dist
+	rm -rf obj
+#	rm -rf bin
 
 mrpropper: clean
-	rm -r obj
-	rm -r bin
+	rm -rf dist
