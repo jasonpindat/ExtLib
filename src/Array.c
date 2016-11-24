@@ -51,9 +51,26 @@ static inline void arrayUnshift(Array a, int base) {
 }
 
 static inline void arraySwap(Array a, int pos1, int pos2) {
-    memcpy(a->temp,                a->ct+a->elemSize*pos1, a->elemSize);
-    memcpy(a->ct+a->elemSize*pos1, a->ct+a->elemSize*pos2, a->elemSize);
-    memcpy(a->ct+a->elemSize*pos2, a->temp,                a->elemSize);
+    if(a->copyFct)
+        a->copyFct(a->temp,                a->ct+a->elemSize*pos1);
+    else
+        memcpy(a->temp,                    a->ct+a->elemSize*pos1, a->elemSize);
+
+    if(a->delFct)
+        a->delFct(a->ct+a->elemSize*pos1);
+
+    if(a->copyFct)
+        a->copyFct(a->ct+a->elemSize*pos1, a->ct+a->elemSize*pos2);
+    else
+        memcpy(a->ct+a->elemSize*pos1,     a->ct+a->elemSize*pos2, a->elemSize);
+
+    if(a->delFct)
+        a->delFct(a->ct+a->elemSize*pos2);
+
+    if(a->copyFct)
+        a->copyFct(a->ct+a->elemSize*pos2, a->temp);
+    else
+        memcpy(a->ct+a->elemSize*pos2,     a->temp, a->elemSize);
 }
 
 
@@ -113,7 +130,7 @@ Array arrayClone(Array a) {
 Array arraySubArray(Array a, int from, int to) {
     Array a2 = malloc(sizeof(struct _Array));
 
-    a->type = ARRAY;
+    a2->type = ARRAY;
 
     a2->copyFct = a->copyFct;
     a2->delFct = a->delFct;
@@ -121,6 +138,7 @@ Array arraySubArray(Array a, int from, int to) {
     a2->length = to-from;
     a2->size = a2->length * 2;
     a2->elemSize = a->elemSize;
+    a2->multithread = a->multithread;
     a2->temp = malloc(a2->elemSize);
     a2->ct = malloc(a2->size * a2->elemSize);
 

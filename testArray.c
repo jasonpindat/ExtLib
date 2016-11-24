@@ -1,6 +1,8 @@
 
 #include "ExtLib/Collection.h"
+#include "ExtLib/Iterable.h"
 #include "ExtLib/Array.h"
+#include "ExtLib/Heap.h"
 
 #include <time.h>
 #include <stdio.h>
@@ -99,8 +101,30 @@ void testArrayCopy() {
     printf("%d\n", *(t2.nb));
 }
 
+void testHeap() {
+
+    Array a = arrayNew(EL_INT);
+
+    for(int i=0; i<100; i++) {
+        int k = 100-i;
+        arrayPush(a, i);
+        arrayPush(a, k);
+    }
+
+    Heap h = toHeap((Collection)a, _elCompareFct(EL_INT));
+
+    arrayDel(a);
+
+    while(!heapIsEmpty(h)) {
+        printf("%d\n", heapGet(h, int));
+        heapPop(h);
+    }
+
+    heapDel(h);
+}
+
 int main() {
-    testArrayIt();
+    testHeap();
 
     return EXIT_SUCCESS;
 }

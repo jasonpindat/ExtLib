@@ -7,6 +7,15 @@
  *
  */
 
+/**
+ * \file Collection.c
+ * \author Jason Pindat
+ * \date 2016-05-16
+ *
+ * Copyright 2014-2016
+ *
+ */
+
 #include "ExtLib/Collection.h"
 
 #include <stdio.h>

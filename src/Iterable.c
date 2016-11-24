@@ -59,6 +59,10 @@ static void toListAddElt(Ptr obj, List l) {
     listAddLast_base(l, obj);
 }
 
+static void toHeapAddElt(Ptr obj, Heap h) {
+    heapPush_base(h, obj);
+}
+
 static ElActFct getAddFct(Collection c) {
     switch(collectionGetType(c)) {
     case ARRAY:
@@ -67,6 +71,8 @@ static ElActFct getAddFct(Collection c) {
         return (ElActFct)toSimpleListAddElt;
     case LIST:
         return (ElActFct)toListAddElt;
+    case HEAP:
+        return (ElActFct)toHeapAddElt;
     default:
         return NULL;
     }
@@ -99,6 +105,15 @@ List toList(Collection src) {
     collectionAddAll((Collection)l, src);
 
     return l;
+}
+
+Heap toHeap(Collection src, ElCmpFct cmpFct) {
+    Heap h = heapNew(collectionGetElemSize(src), cmpFct);
+    collectionElementInstanciable((Collection)h, collectionGetCopyFunction(src), collectionGetDelFunction(src));
+
+    collectionAddAll((Collection)h, src);
+
+    return h;
 }
 
 

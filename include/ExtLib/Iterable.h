@@ -16,6 +16,7 @@
 #include "Array.h"
 #include "SimpleList.h"
 #include "List.h"
+#include "Heap.h"
 
 /** \brief Returns a new array containing all the elements of the collection. The copy and delete functions are forwarded to the array.
  *
@@ -40,6 +41,14 @@ SimpleList toSimpleList(Collection src);
  *
  */
 List toList(Collection src);
+
+/** \brief Returns a new heap containing all the elements of the collection. The copy and delete functions are forwarded to the heap. A comparison function must have been set in the collection.
+ *
+ * \param src : collection.
+ * \return a heap.
+ *
+ */
+Heap toHeap(Collection src, ElCmpFct cmpFct);
 
 
 

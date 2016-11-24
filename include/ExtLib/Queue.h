@@ -5,6 +5,9 @@
  * \date 2016-05-16
  *
  * All the basic functions to manage queues.
+ * Queue is not a Collection and is not Iterable
+ *
+ * Copyright 2014-2016
  *
  */
 

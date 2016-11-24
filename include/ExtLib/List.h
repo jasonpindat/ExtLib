@@ -5,6 +5,7 @@
  * \date 2016-05-16
  *
  * All the basic functions to manage doubly-linked lists.
+ * List is an Iterable Collection
  *
  * Copyright 2014-2016
  *

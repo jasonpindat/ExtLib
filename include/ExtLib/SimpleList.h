@@ -5,6 +5,7 @@
  * \date 04/21/2014
  *
  * All the basic functions to manage singly-linked lists, every function is in constant complexity except sllDel which can be linear if items remains in the list when destroying it.
+ * SimpleList is an Iterable Collection.
  *
  * Copyright 2014-2016
  *

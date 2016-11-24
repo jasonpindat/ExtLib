@@ -5,6 +5,7 @@
  * \date 2016-05-16
  *
  * All the basic functions to manage dynamic one-dimention arrays.
+ * Array is an Iterable Collection.
  *
  * Copyright 2014-2016
  *
@@ -88,7 +89,7 @@ void arrayClear(Array a);
 
 
 
-/** \brief Tells whether a vector is empty or not
+/** \brief Tells whether an array is empty or not
  *
  * \param a : Array to look in.
  * \return true if empty, false if not.

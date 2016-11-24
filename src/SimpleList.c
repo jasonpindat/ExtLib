@@ -93,6 +93,8 @@ SimpleList simpleListClone(SimpleList l) {
     l2->copyFct = l->copyFct;
     l2->delFct = l->delFct;
 
+    simpleListMultithread(l2, !l->temp);
+
     SimpleListNode node = l->first;
     bool first = true;
     SimpleListIt it;

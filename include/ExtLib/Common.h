@@ -17,7 +17,8 @@ typedef enum {
     ARRAY,
     SIMPLELIST,
     LIST,
-    STRING
+    STRING,
+    HEAP
 } RealType;
 
 /** Ascendant sorting */

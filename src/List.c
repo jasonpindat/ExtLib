@@ -97,6 +97,8 @@ List listClone(List l) {
     l2->copyFct = l->copyFct;
     l2->delFct = l->delFct;
 
+    listMultithread(l2, !l->temp);
+
     ListNode node = l->first;
 
     while(node) {

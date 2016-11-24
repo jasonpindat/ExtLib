@@ -5,6 +5,7 @@
  * \date 2016-05-16
  *
  * All the basic functions to manage dynamic strings.
+ * String is not a Collection but is Iterable
  *
  * Copyright 2014-2016
  *

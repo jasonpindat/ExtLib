@@ -29,6 +29,7 @@
 		<Unit filename="include/ExtLib/Array.h" />
 		<Unit filename="include/ExtLib/Collection.h" />
 		<Unit filename="include/ExtLib/Common.h" />
+		<Unit filename="include/ExtLib/Heap.h" />
 		<Unit filename="include/ExtLib/Iterable.h" />
 		<Unit filename="include/ExtLib/List.h" />
 		<Unit filename="include/ExtLib/Queue.h" />
@@ -42,6 +43,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/Common.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/Heap.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/Iterable.c">
