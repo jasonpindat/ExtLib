@@ -23,3 +23,5 @@ SimpleList.h fait
 Continuer SimpleList.c après simpleListContains
 
 Tester Multithread en lecture (Array, List et SimpleList)
+
+Faire tout par pointeur (sauf si taille <= pointeur) pour List et SimpleList

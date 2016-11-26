@@ -46,6 +46,30 @@ void testArray1() {
     printf("%d\n", arrayLength(a));
 
     arrayDel(a);
+
+
+    a = arrayNew(EL_POINTER);
+
+    Ptr *vals2 = malloc(nb*sizeof(Ptr));
+
+    for(int i=0; i<nb; i++)
+        vals2[i]=(Ptr)i;
+
+    for(int i=0; i<nb; i++)
+        arrayPush(a, vals2[i]);
+
+    free(vals2);
+
+    arrayDump(a);
+
+    arrayTrimCapacity(a);
+
+    arrayDump(a);
+
+    for(int i=0; i<nb; i++)
+        printf("%d\n", (int)arrayGet(a, i, Ptr));
+
+    arrayDel(a);
 }
 
 void printElement(int *elt, Ptr infos) {
@@ -111,9 +135,11 @@ void testHeap() {
         arrayPush(a, k);
     }
 
-    Heap h = toHeap((Collection)a, _elCompareFct(EL_INT));
+    Heap h = toHeap((Collection)a);
 
     arrayDel(a);
+
+    heapDump(h);
 
     while(!heapIsEmpty(h)) {
         printf("%d\n", heapGet(h, int));
@@ -124,7 +150,7 @@ void testHeap() {
 }
 
 int main() {
-    testHeap();
+    testArray1();
 
     return EXIT_SUCCESS;
 }

@@ -1,16 +1,7 @@
 /**
  * \file Collection.c
  * \author Jason Pindat
- * \date 2016-05-16
- *
- * Copyright 2014-2016
- *
- */
-
-/**
- * \file Collection.c
- * \author Jason Pindat
- * \date 2016-05-16
+ * \date 2016-11-26
  *
  * Copyright 2014-2016
  *
@@ -25,9 +16,31 @@
 struct _Collection {
     RealType type;
     int elemSize;
+    ElCmpFct cmpFct;
     ElCopyFct copyFct;
     ElDelFct delFct;
+    bool needsAllocation;
+    Ptr (*ptrTransform)(Ptr);
 };
+
+
+
+static Ptr noAllocationTransform(Ptr obj) {
+    return obj;
+}
+
+static Ptr allocationTransform(Ptr obj) {
+    return *((Ptr *)obj);
+}
+
+static inline bool objNeedsAllocation(Collection c) {
+    return c->elemSize > sizeof(Ptr) || c->copyFct || c->delFct;
+}
+
+static inline void collectionUpdAllocationPolicy(Collection c) {
+    c->needsAllocation = objNeedsAllocation(c);
+    c->ptrTransform = c->needsAllocation ? allocationTransform : noAllocationTransform;
+}
 
 
 
@@ -50,9 +63,16 @@ int collectionGetElemSize(Collection c) {
 
 
 
+ElCmpFct collectionGetCmpFct(Collection c) {
+    return c->cmpFct;
+}
+
+
+
 void collectionElementInstanciable(Collection c, ElCopyFct copyFct, ElDelFct delFct) {
     c->copyFct = copyFct;
     c->delFct = delFct;
+    collectionUpdAllocationPolicy(c);
 }
 
 ElCopyFct collectionGetCopyFunction(Collection c) {

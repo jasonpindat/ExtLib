@@ -17,11 +17,13 @@
 struct _SimpleList {
     RealType type;
     int elemSize;
+    ElCmpFct cmpFct;
     ElCopyFct copyFct;
     ElDelFct delFct;
+    bool needsAllocation;
+    Ptr (*ptrTransform)(Ptr);
 
     int length;
-    ElCmpFct cmpFct;
     Ptr temp;
 
     SimpleListNode first;

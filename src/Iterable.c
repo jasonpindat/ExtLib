@@ -82,6 +82,7 @@ static ElActFct getAddFct(Collection c) {
 
 Array toArray(Collection src) {
     Array a = arrayNew(collectionGetElemSize(src));
+    arrayComparable(a, collectionGetCmpFct((Collection)src));
     collectionElementInstanciable((Collection)a, collectionGetCopyFunction(src), collectionGetDelFunction(src));
 
     collectionAddAll((Collection)a, src);
@@ -91,6 +92,7 @@ Array toArray(Collection src) {
 
 SimpleList toSimpleList(Collection src) {
     SimpleList l = simpleListNew(collectionGetElemSize(src));
+    simpleListComparable(l, collectionGetCmpFct((Collection)src));
     collectionElementInstanciable((Collection)l, collectionGetCopyFunction(src), collectionGetDelFunction(src));
 
     collectionAddAll((Collection)l, src);
@@ -100,6 +102,7 @@ SimpleList toSimpleList(Collection src) {
 
 List toList(Collection src) {
     List l = listNew(collectionGetElemSize(src));
+    listComparable(l, collectionGetCmpFct((Collection)src));
     collectionElementInstanciable((Collection)l, collectionGetCopyFunction(src), collectionGetDelFunction(src));
 
     collectionAddAll((Collection)l, src);
@@ -107,8 +110,9 @@ List toList(Collection src) {
     return l;
 }
 
-Heap toHeap(Collection src, ElCmpFct cmpFct) {
-    Heap h = heapNew(collectionGetElemSize(src), cmpFct);
+Heap toHeap(Collection src) {
+    Heap h = heapNew(collectionGetElemSize(src));
+    heapComparable(h, collectionGetCmpFct((Collection)src));
     collectionElementInstanciable((Collection)h, collectionGetCopyFunction(src), collectionGetDelFunction(src));
 
     collectionAddAll((Collection)h, src);

@@ -48,7 +48,7 @@ List toList(Collection src);
  * \return a heap.
  *
  */
-Heap toHeap(Collection src, ElCmpFct cmpFct);
+Heap toHeap(Collection src);
 
 
 

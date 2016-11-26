@@ -1,13 +1,14 @@
 /**
  * \file Array.c
  * \author Jason Pindat
- * \date 2016-05-16
+ * \date 2016-11-26
  *
  * Copyright 2014-2016
  *
  */
 
 #include "ExtLib/Common.h"
+#include "ExtLib/Collection.h"
 #include "ExtLib/Array.h"
 
 #include <stdio.h>
@@ -20,11 +21,13 @@
 struct _Array {
     RealType type;
     int elemSize;
+    ElCmpFct cmpFct;
     ElCopyFct copyFct;
     ElDelFct delFct;
+    bool needsAllocation;
+    Ptr (*ptrTransform)(Ptr);
 
     int length;
-    ElCmpFct cmpFct;
     Ptr temp;
 
     bool multithread;
@@ -35,13 +38,8 @@ struct _Array {
 
 
 
-static inline void arrayResize(Array a) {
-    a->size*=2;
-    a->ct=realloc(a->ct, a->size*sizeof(Ptr));
-}
-
 static inline void arrayShift(Array a, int base) {
-    for(int i=a->length-1; i>=base; i--) // size must be ok because Shift adds a "new" index
+    for(int i=a->length-1; i>=base; i--)
         a->ct[i+1] = a->ct[i];
 }
 
@@ -72,14 +70,15 @@ Array arrayNew(int elemSize) {
         a->cmpFct=NULL;
     }
 
-    a->copyFct = NULL;
-    a->delFct = NULL;
+    collectionElementInstanciable((Collection)a, NULL, NULL);
 
-    a->temp = malloc(a->elemSize);
     a->length = 0;
+    a->temp = malloc(a->elemSize);
+
+    a->multithread = false;
 
     a->size = DEFSIZE;
-    a->ct = malloc(DEFSIZE*sizeof(Ptr));
+    a->ct = malloc(DEFSIZE * sizeof(Ptr));
 
     return a;
 }
@@ -109,23 +108,26 @@ Array arrayClone(Array a) {
 }
 
 Array arraySubArray(Array a, int from, int to) {
-
     Array a2 = malloc(sizeof(struct _Array));
 
     a2->type = ARRAY;
-
+    a2->elemSize = a->elemSize;
     a2->copyFct = a->copyFct;
     a2->delFct = a->delFct;
-    a2->cmpFct = a->cmpFct;
+    a2->needsAllocation = a->needsAllocation;
+    a2->ptrTransform = a->ptrTransform;
+
     a2->length = 0;
-    a2->size = a2->length * 2;
-    a2->elemSize = a->elemSize;
-    a2->multithread = a->multithread;
+    a2->cmpFct = a->cmpFct;
     a2->temp = malloc(a2->elemSize);
+
+    a2->multithread = a->multithread;
+
+    a2->size = a->length * 2;
     a2->ct = malloc(a2->size * sizeof(Ptr));
 
     for(int i=from; i<to; i++)
-        arrayPush_base(a2, a->ct[i]);
+        arrayPush_base(a2, a->ptrTransform(&a->ct[i]));
 
     return a2;
 }
@@ -164,7 +166,7 @@ bool arrayContains(Array a, Ptr data) {
 
 int arrayIndexOf(Array a, Ptr data) {
     for(int i=0; i<a->length; i++)
-        if(a->cmpFct(a->ct[i], data) == 0) //!\ ct[i] à gérer selon pointeur ou pas
+        if(a->cmpFct(a->ptrTransform(&a->ct[i]), data) == 0) //!\ ct[i] à gérer selon pointeur ou pas
             return i;
 
     return -1;
@@ -172,7 +174,7 @@ int arrayIndexOf(Array a, Ptr data) {
 
 int arrayLastIndexOf(Array a, Ptr data) {
     for(int i=a->length-1; i>=0; i--)
-        if(a->cmpFct(a->ct[i], data) == 0) //!\ ct[i] à gérer selon pointeur ou pas
+        if(a->cmpFct(a->ptrTransform(&a->ct[i]), data) == 0) //!\ ct[i] à gérer selon pointeur ou pas
             return i;
 
     return -1;
@@ -184,28 +186,28 @@ Ptr arrayGet_base(Array a, int pos) {
     if(a->copyFct) {
         if(a->multithread) {
             Ptr temp = malloc(a->elemSize);
-            a->copyFct(temp, a->ct[pos]); //!\ ct[i] à gérer selon pointeur ou pas
+            a->copyFct(temp, a->ptrTransform(&a->ct[pos])); //!\ ct[i] à gérer selon pointeur ou pas
             return temp;
         }
         else {
-            a->copyFct(a->temp, a->ct[pos]); //!\ ct[i] à gérer selon pointeur ou pas
+            a->copyFct(a->temp, a->ptrTransform(&a->ct[pos])); //!\ ct[i] à gérer selon pointeur ou pas
             return a->temp;
         }
     }
     else
-        return a->ct[pos]; //!\ ct[i] à gérer selon pointeur ou pas
+        return a->ptrTransform(&a->ct[pos]); //!\ ct[i] à gérer selon pointeur ou pas
 }
 
 
 
 void arraySet_base(Array a, int pos, Ptr data) {
     if(a->delFct)
-        a->delFct(a->ct[pos]); //!\ ct[i] à gérer selon pointeur ou pas
+        a->delFct(a->ptrTransform(&a->ct[pos])); //!\ ct[i] à gérer selon pointeur ou pas
 
     if(a->copyFct)
-        a->copyFct(a->ct[pos], data); //!\ ct[i] à gérer selon pointeur ou pas
+        a->copyFct(a->ptrTransform(&a->ct[pos]), data); //!\ ct[i] à gérer selon pointeur ou pas
     else
-        memcpy(a->ct[pos], data, a->elemSize); //!\ ct[i] à gérer selon pointeur ou pas
+        memcpy(a->ptrTransform(&a->ct[pos]), data, a->elemSize); //!\ ct[i] à gérer selon pointeur ou pas
 }
 
 
@@ -215,17 +217,20 @@ void arrayPush_base(Array a, Ptr data) {
 }
 
 void arrayAdd_base(Array a, int pos, Ptr data) {
-    if(a->length >= a->size)
-        arrayResize(a);
+    if(a->length >= a->size) {
+        a->size *= 2;
+        a->ct = realloc(a->ct, a->size*sizeof(Ptr));
+    }
 
     arrayShift(a, pos);
 
-    a->ct[pos] = malloc(a->elemSize); //!\ ct[i] à gérer selon pointeur ou pas
+    if(a->needsAllocation)
+        a->ct[pos] = malloc(a->elemSize); //!\ ct[i] à gérer selon pointeur ou pas
 
     if(a->copyFct)
-        a->copyFct(a->ct[pos], data); //!\ ct[i] à gérer selon pointeur ou pas
+        a->copyFct(a->ptrTransform(&a->ct[pos]), data); //!\ ct[i] à gérer selon pointeur ou pas
     else
-        memcpy(a->ct[pos], data, a->elemSize); //!\ ct[i] à gérer selon pointeur ou pas
+        memcpy(a->ptrTransform(&a->ct[pos]), data, a->elemSize); //!\ ct[i] à gérer selon pointeur ou pas
 
     a->length++;
 }
@@ -238,13 +243,19 @@ void arrayPop(Array a) {
 
 void arrayRemove(Array a, int pos) {
     if(a->delFct)
-        a->delFct(a->ct[pos]); //!\ ct[i] à gérer selon pointeur ou pas
+        a->delFct(a->ptrTransform(&a->ct[pos])); //!\ ct[i] à gérer selon pointeur ou pas
 
-    free(a->ct[pos]); //!\ ct[i] à gérer selon pointeur ou pas
+    if(a->needsAllocation)
+        free(a->ct[pos]); //!\ ct[i] à gérer selon pointeur ou pas
 
     arrayUnshift(a, pos);
 
     a->length--;
+
+    if ((a->length <= (a->size / 4)) && (a->size / 2 >= DEFSIZE)) {
+		a->size /= 2;
+		a->ct = realloc(a->ct, a->size * sizeof(Ptr));
+	}
 }
 
 
@@ -252,16 +263,18 @@ void arrayRemove(Array a, int pos) {
 static void arraySortQS(Array a, int method, int p, int r) {
     if (p < r) {
 
+        Ptr pPtr = a->ptrTransform(&a->ct[p]);
+
         int i = p-1, j = r+1;
 
         while(true) {
             do
                 j--;
-            while(method * a->cmpFct(a->ct[j], a->ct[p]) > 0);
+            while(method * a->cmpFct(a->ptrTransform(&a->ct[j]), pPtr) > 0);
 
             do
                 i++;
-            while(method * a->cmpFct(a->ct[i], a->ct[p]) < 0);
+            while(method * a->cmpFct(a->ptrTransform(&a->ct[i]), pPtr) < 0);
 
             if(i < j)
                 arraySwap(a, i, j);
@@ -293,7 +306,9 @@ void arrayRandomize(Array a) {
 void arrayDump(Array a) {
     int elts=arrayLength(a);
     int effcost=elts*a->elemSize;
-    int opcost=sizeof(struct _Array)+a->size*sizeof(Ptr); //!\ ct[i] à gérer selon pointeur ou pas
+    int opcost=sizeof(struct _Array); //!\ ct[i] à gérer selon pointeur ou pas
+    if(a->needsAllocation)
+        opcost += a->size*sizeof(Ptr);
     int preallcost=(a->size-elts)*a->elemSize;
 
     printf("Array at %p\n", a);
@@ -376,5 +391,5 @@ void arrayItRemove(ArrayIt *it) {
 
 void arrayForEach(Array a, ElActFct actFct, Ptr infos) {
     for(int i=0; i<a->length; i++)
-        actFct(a->ct[i], infos); //!\ ct[i] à gérer selon pointeur ou pas
+        actFct(a->ptrTransform(&a->ct[i]), infos); //!\ ct[i] à gérer selon pointeur ou pas
 }

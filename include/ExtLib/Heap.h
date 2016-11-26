@@ -2,7 +2,7 @@
  * \file Heap.h
  * \brief Primitives functions for heaps
  * \author Jason Pindat
- * \date 2016-11-24
+ * \date 2016-11-26
  *
  * All the basic functions to manage heaps.
  * Heap is a Collection but is not Iterable
@@ -28,7 +28,7 @@ typedef struct _Heap *Heap;
  * \return New empty heap.
  *
  */
-Heap heapNew(int elemSize, ElCmpFct cmpFct);
+Heap heapNew(int elemSize);
 
 /** \brief Destroys a heap and all its content (Not primitive).
  *
@@ -39,6 +39,15 @@ Heap heapNew(int elemSize, ElCmpFct cmpFct);
 void heapDel(Heap h);
 
 
+
+/** \brief Sets the function to compare 2 elements of this heap, note that if you declared the heap with EL_*, the comparison function of the specified type is automatically linked. Otherwise, a function must be provided.
+ *
+ * \param h : Heap in which you set the fonction.
+ * \param fct : pointer to the function, the function must take 2 pointers to the data and return an int which is <0 if 1st value is lower tha 2nd, >0 for the opposite and =0 if 1st value equals 2nd value.
+ * \return nothing.
+ *
+ */
+void heapComparable(Heap h, ElCmpFct fct);
 
 /** \brief Sets whether the heap can be accessed for reading by multiple threads.
  *
@@ -121,6 +130,16 @@ void heapPush_base(Heap h, Ptr data);
  *
  */
 void heapPop(Heap h);
+
+
+
+/** \brief Details the heap usage of a given heap
+ *
+ * \param h : Heap to dump.
+ * \return nothing.
+ *
+ */
+void heapDump(Heap h);
 
 
 
