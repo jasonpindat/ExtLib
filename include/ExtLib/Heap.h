@@ -57,7 +57,7 @@ void heapComparable(Heap h, ElCmpFct fct);
  * \return Copy of the heap
  *
  */
-Heap heapClone(Heap h);
+Heap heapClone(const Heap h);
 
 
 
@@ -77,7 +77,7 @@ void heapClear(Heap h);
  * \return true if empty, false if not.
  *
  */
-bool heapIsEmpty(Heap h);
+bool heapIsEmpty(const Heap h);
 
 /** \brief Returns the length of the heap.
  *
@@ -85,7 +85,7 @@ bool heapIsEmpty(Heap h);
  * \return Number of elements.
  *
  */
-int heapLength(Heap h);
+int heapLength(const Heap h);
 
 
 
@@ -95,7 +95,7 @@ int heapLength(Heap h);
  * \return Pointer to data.
  *
  */
-Ptr heapGet_base(Heap h);
+const Ptr heapGet_base(const Heap h);
 /** Automatic cast macro to translate Ptr returned by heapGet_base into type */
 #define heapGet(h, type) (*(type*)heapGet_base(h))
 
@@ -108,7 +108,7 @@ Ptr heapGet_base(Heap h);
  * \return The same vector.
  *
  */
-void heapPush_base(Heap h, Ptr data);
+void heapPush_base(Heap h, const Ptr data);
 /** Automatic macro to send the address of data to heapPush_base */
 #define heapPush(h, data) heapPush_base(h, &(data))
 
@@ -130,7 +130,7 @@ void heapPop(Heap h);
  * \return nothing.
  *
  */
-void heapDump(Heap h);
+void heapDump(const Heap h);
 
 
 

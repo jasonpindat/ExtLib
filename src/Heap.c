@@ -73,7 +73,7 @@ void heapComparable(Heap h, ElCmpFct fct) {
 
 
 
-Heap heapClone(Heap h) {
+Heap heapClone(const Heap h) {
     Heap h2 = malloc(sizeof(struct _Heap));
 
     h2->type = HEAP;
@@ -116,23 +116,23 @@ void heapClear(Heap h) {
 
 
 
-bool heapIsEmpty(Heap h) {
+bool heapIsEmpty(const Heap h) {
     return h->length == 0;
 }
 
-int heapLength(Heap h) {
+int heapLength(const Heap h) {
     return h->length;
 }
 
 
 
-Ptr heapGet_base(Heap h) {
+const Ptr heapGet_base(const Heap h) {
     return h->ptrTransform(&h->data[0]);
 }
 
 
 
-void heapPush_base(Heap h, Ptr value)
+void heapPush_base(Heap h, const Ptr value)
 {
 	unsigned int index, parent;
 
@@ -161,7 +161,7 @@ void heapPush_base(Heap h, Ptr value)
             memcpy(h->data[index], value, h->elemSize);
 	}
 	else
-        h->data[index] = value;
+        memcpy(&h->data[index], value, h->elemSize);
 }
 
 
@@ -211,7 +211,7 @@ void heapPop(Heap h)
 
 
 
-void heapDump(Heap h) {
+void heapDump(const Heap h) {
     int elts=heapLength(h);
     int effcost=elts*h->elemSize;
     int opcost=sizeof(struct _Heap);

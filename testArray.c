@@ -150,7 +150,8 @@ void testHeap() {
 }
 
 int main() {
-    testArray1();
+    //testArray1();
+    testHeap();
 
     return EXIT_SUCCESS;
 }

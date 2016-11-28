@@ -101,9 +101,9 @@ void listClear(List l) {
 
     while(node) {
 
-        if(a->needsAllocation) {
-            if(a->delFct)
-                a->delFct(node->data);
+        if(l->needsAllocation) {
+            if(l->delFct)
+                l->delFct(node->data);
 
             free(node->data);
         }
@@ -156,7 +156,7 @@ Ptr listGetLast_base(List l) {
 
 
 void listSetFirst_base(List l, Ptr data) {
-    if(a->needsAllocation) {
+    if(l->needsAllocation) {
         if(l->delFct)
             l->delFct(l->first->data);
 
@@ -166,11 +166,11 @@ void listSetFirst_base(List l, Ptr data) {
             memcpy(l->first->data, data, l->elemSize);
     }
     else
-        l->first->data = data;
+        memcpy(&l->first->data, data, l->elemSize);
 }
 
 void listSetLast_base(List l, Ptr data) {
-    if(a->needsAllocation) {
+    if(l->needsAllocation) {
         if(l->delFct)
             l->delFct(l->last->data);
 
@@ -180,7 +180,7 @@ void listSetLast_base(List l, Ptr data) {
             memcpy(l->last->data, data, l->elemSize);
     }
     else
-        l->last->data = data;
+        memcpy(&l->last->data, data, l->elemSize);
 }
 
 
@@ -199,7 +199,7 @@ void listAddFirst_base(List l, Ptr data) {
     else
         l->last = node;
 
-    if(a->needsAllocation) {
+    if(l->needsAllocation) {
         node->data = memory + sizeof(struct _ListNode);
 
         if(l->copyFct)
@@ -208,7 +208,7 @@ void listAddFirst_base(List l, Ptr data) {
             memcpy(node->data, data, l->elemSize);
     }
     else
-        node->data = data;
+        memcpy(&node->data, data, l->elemSize);
 
     l->length++;
 }
@@ -227,7 +227,7 @@ void listAddLast_base(List l, Ptr data) {
     else
         l->first = node;
 
-    if(a->needsAllocation) {
+    if(l->needsAllocation) {
         node->data = memory + sizeof(struct _ListNode);
 
         if(l->copyFct)
@@ -236,7 +236,7 @@ void listAddLast_base(List l, Ptr data) {
             memcpy(node->data, data, l->elemSize);
     }
     else
-        node->data = data;
+        memcpy(&node->data, data, l->elemSize);
 
     l->length++;
 }
@@ -375,13 +375,13 @@ void listItPrev(ListIt *it) {
 
 
 Ptr listItGet_base(ListIt *it) {
-    return l->ptrTransform(&l->node->data);
+    return it->list->ptrTransform(&it->node->data);
 }
 
 
 
 void listItSet_base(ListIt *it, Ptr data) {
-    if(l->needsAllocation) {
+    if(it->list->needsAllocation) {
         if(it->list->delFct)
             it->list->delFct(it->node->data);
 
@@ -391,13 +391,13 @@ void listItSet_base(ListIt *it, Ptr data) {
             memcpy(it->node->data, data, it->list->elemSize);
     }
     else
-        it->node->data = data;
+        memcpy(&it->node->data, data, it->list->elemSize);
 }
 
 
 
 void listItAddAfter_base(ListIt *it, Ptr data) {
-    void *memory = malloc(sizeof(struct _ListNode) + l->needsAllocation?it->list->elemSize:0);
+    void *memory = malloc(sizeof(struct _ListNode) + it->list->needsAllocation?it->list->elemSize:0);
 
     ListNode newnode = memory;
 
@@ -410,7 +410,7 @@ void listItAddAfter_base(ListIt *it, Ptr data) {
     else
         it->list->last = newnode;
 
-    if(l->needsAllocation) {
+    if(it->list->needsAllocation) {
         newnode->data = memory + sizeof(struct _ListNode);
 
         if(it->list->copyFct)
@@ -419,13 +419,13 @@ void listItAddAfter_base(ListIt *it, Ptr data) {
             memcpy(newnode->data, data, it->list->elemSize);
     }
     else
-        newnode->data = data;
+        memcpy(&newnode->data, data, it->list->elemSize);
 
     it->list->length++;
 }
 
 void listItAddBefore_base(ListIt *it, Ptr data) {
-    void *memory = malloc(sizeof(struct _ListNode) + l->needsAllocation?it->list->elemSize:0);
+    void *memory = malloc(sizeof(struct _ListNode) + it->list->needsAllocation?it->list->elemSize:0);
 
     ListNode newnode = memory;
 
@@ -438,7 +438,7 @@ void listItAddBefore_base(ListIt *it, Ptr data) {
     else
         it->list->first = newnode;
 
-    if(l->needsAllocation) {
+    if(it->list->needsAllocation) {
         newnode->data = memory + sizeof(struct _ListNode);
 
         if(it->list->copyFct)
@@ -447,7 +447,7 @@ void listItAddBefore_base(ListIt *it, Ptr data) {
             memcpy(newnode->data, data, it->list->elemSize);
     }
     else
-        newnode->data = data;
+        memcpy(&newnode->data, data, it->list->elemSize);
 
     it->list->length++;
 }

@@ -197,7 +197,7 @@ void arraySet_base(Array a, int pos, const Ptr data) {
             memcpy(a->ct[pos], data, a->elemSize);
     }
     else
-        a->ct[pos] = data;
+        memcpy(&a->ct[pos], data, a->elemSize);
 }
 
 
@@ -223,7 +223,7 @@ void arrayAdd_base(Array a, int pos, const Ptr data) {
             memcpy(a->ct[pos], data, a->elemSize);
     }
     else
-        a->ct[pos] = data;
+        memcpy(&a->ct[pos], data, a->elemSize);
 
     a->length++;
 }
@@ -282,7 +282,7 @@ static void arraySortQS(Array a, int method, int p, int r) {
 }
 
 void arraySort(Array a, int method) {
-    if(a->length>=2)
+    if(a->length >= 2)
         arraySortQS(a, method, 0, a->length-1);
 }
 
