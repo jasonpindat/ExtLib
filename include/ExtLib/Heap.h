@@ -49,15 +49,6 @@ void heapDel(Heap h);
  */
 void heapComparable(Heap h, ElCmpFct fct);
 
-/** \brief Sets whether the heap can be accessed for reading by multiple threads.
- *
- * \param h : Heap.
- * \param multithread : boolean value to allow multithreaded access.
- * \return nothing.
- *
- */
-void heapMultithread(Heap h, bool multithread);
-
 
 
 /** \brief Copies a heap and all its content.

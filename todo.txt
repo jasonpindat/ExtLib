@@ -24,4 +24,6 @@ Continuer SimpleList.c après simpleListContains
 
 Tester Multithread en lecture (Array, List et SimpleList)
 
-Faire tout par pointeur (sauf si taille <= pointeur) pour List et SimpleList
+Faire tout par pointeur (sauf si taille <= pointeur) pour SimpleList
+
+Mettre const ou c'est possible

@@ -27,9 +27,6 @@ struct _Heap {
     Ptr (*ptrTransform)(Ptr);
 
     unsigned int length;
-    Ptr temp;
-
-    bool multithread;
 
 	unsigned int size;
     Ptr *data;
@@ -54,9 +51,6 @@ Heap heapNew(int elemSize) {
     collectionElementInstanciable((Collection)h, NULL, NULL);
 
     h->length = 0;
-    h->temp = malloc(h->elemSize);
-
-    h->multithread = false;
 
     h->size = DEFSIZE;
     h->data = malloc(DEFSIZE * sizeof(Ptr));
@@ -67,7 +61,6 @@ Heap heapNew(int elemSize) {
 void heapDel(Heap h) {
     heapClear(h);
 
-    free(h->temp);
     free(h->data);
     free(h);
 }
@@ -78,10 +71,6 @@ void heapComparable(Heap h, ElCmpFct fct) {
     h->cmpFct = fct;
 }
 
-void heapMultithread(Heap h, bool multithread) {
-    h->multithread = multithread;
-}
-
 
 
 Heap heapClone(Heap h) {
@@ -89,18 +78,17 @@ Heap heapClone(Heap h) {
 
     h2->type = HEAP;
     h2->elemSize = h->elemSize;
+    h2->cmpFct = h->cmpFct;
     h2->copyFct = h->copyFct;
     h2->delFct = h->delFct;
     h2->needsAllocation = h->needsAllocation;
     h2->ptrTransform = h->ptrTransform;
 
     h2->length = 0;
-    h2->cmpFct = h->cmpFct;
-    h2->temp = malloc(h2->elemSize);
-
-    h2->multithread = h->multithread;
 
     h2->size = h->length * 2;
+    if(h2->size < DEFSIZE)
+        h2->size = DEFSIZE;
     h2->data = malloc(h2->size * sizeof(Ptr));
 
     for(int i=0; i<h->length; i++)
@@ -112,8 +100,18 @@ Heap heapClone(Heap h) {
 
 
 void heapClear(Heap h) {
-    while(h->length > 0)
-        heapPop(h);
+    if(h->needsAllocation) {
+        for(int i=0; i<h->length; i++) {
+            if(h->delFct)
+                h->delFct(h->data[i]);
+
+            free(h->data[i]);
+        }
+    }
+
+    h->length = 0;
+    h->size = DEFSIZE;
+    h->data = realloc(h->data, DEFSIZE * sizeof(Ptr));
 }
 
 
@@ -129,19 +127,7 @@ int heapLength(Heap h) {
 
 
 Ptr heapGet_base(Heap h) {
-    if(h->copyFct) {
-        if(h->multithread) {
-            Ptr temp = malloc(h->elemSize);
-            h->copyFct(temp, h->ptrTransform(&h->data[0]));
-            return temp;
-        }
-        else {
-            h->copyFct(h->temp, h->ptrTransform(&h->data[0]));
-            return h->temp;
-        }
-    }
-    else
-        return h->ptrTransform(&h->data[0]);
+    return h->ptrTransform(&h->data[0]);
 }
 
 
@@ -166,14 +152,16 @@ void heapPush_base(Heap h, Ptr value)
 		h->data[index] = h->data[parent];
 	}
 
-	if(h->needsAllocation)
-        h->data[index] = malloc(h->elemSize); //!\ ct[i] à gérer selon pointeur ou pas
+	if(h->needsAllocation) {
+        h->data[index] = malloc(h->elemSize);
 
-	//h->data[index] = value;
-	if(h->copyFct)
-        h->copyFct(h->ptrTransform(&h->data[index]), value);
-    else
-        memcpy(h->ptrTransform(&h->data[index]), value, h->elemSize);
+        if(h->copyFct)
+            h->copyFct(h->data[index], value);
+        else
+            memcpy(h->data[index], value, h->elemSize);
+	}
+	else
+        h->data[index] = value;
 }
 
 
@@ -182,13 +170,12 @@ void heapPop(Heap h)
 {
 	unsigned int index, swap, other;
 
+    if(h->needsAllocation) {
+        if(h->delFct)
+            h->delFct(h->data[0]);
 
-	if(h->delFct)
-        h->delFct(h->ptrTransform(&h->data[0]));
-
-    if(h->needsAllocation)
         free(h->data[0]);
-
+    }
 
 	h->length--;
 
@@ -227,7 +214,7 @@ void heapPop(Heap h)
 void heapDump(Heap h) {
     int elts=heapLength(h);
     int effcost=elts*h->elemSize;
-    int opcost=sizeof(struct _Heap); //!\ ct[i] à gérer selon pointeur ou pas
+    int opcost=sizeof(struct _Heap);
     if(h->needsAllocation)
         opcost += h->size*sizeof(Ptr);
     int preallcost=(h->size-elts)*h->elemSize;
@@ -239,8 +226,8 @@ void heapDump(Heap h) {
     printf("\t%d bytes used as preallocated\n", preallcost);
     printf("\t%d bytes total used\n", effcost+opcost+preallcost);
 
-    for(int i=0; i<h->length; i++)
-        printf("%d\n", *((int*)h->ptrTransform(&h->data[i])));
+    /*for(int i=0; i<h->length; i++)
+        printf("%d\n", *((int*)h->ptrTransform(&h->data[i])));*/
 }
 
 

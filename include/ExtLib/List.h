@@ -2,7 +2,7 @@
  * \file List.h
  * \brief Primitives functions for doubly-linked lists
  * \author Jason Pindat
- * \date 2016-05-16
+ * \date 2016-11-26
  *
  * All the basic functions to manage doubly-linked lists.
  * List is an Iterable Collection
@@ -50,15 +50,6 @@ void listDel(List l);
  *
  */
 void listComparable(List l, ElCmpFct fct);
-
-/** \brief Sets whether the list can be accessed for reading by multiple threads.
- *
- * \param l : List.
- * \param multithread : boolean value to allow multithreaded access.
- * \return nothing.
- *
- */
-void listMultithread(List l, bool multithread);
 
 
 

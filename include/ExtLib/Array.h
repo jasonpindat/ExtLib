@@ -2,7 +2,7 @@
  * \file Array.h
  * \brief Primitives functions for arrays
  * \author Jason Pindat
- * \date 2016-05-16
+ * \date 2016-11-26
  *
  * All the basic functions to manage dynamic one-dimention arrays.
  * Array is an Iterable Collection.
@@ -48,15 +48,6 @@ void arrayDel(Array a);
  */
 void arrayComparable(Array a, ElCmpFct fct);
 
-/** \brief Sets whether the array can be accessed for reading by multiple threads.
- *
- * \param a : Array.
- * \param multithread : boolean value to allow multithreaded access.
- * \return nothing.
- *
- */
-void arrayMultithread(Array a, bool multithread);
-
 
 
 /** \brief Copies an array and all its content.
@@ -65,7 +56,7 @@ void arrayMultithread(Array a, bool multithread);
  * \return Copy of the array
  *
  */
-Array arrayClone(Array a);
+Array arrayClone(const Array a);
 
 /** \brief Returns a sub-array and all its content.
  *
@@ -75,7 +66,7 @@ Array arrayClone(Array a);
  * \return Copy of the array
  *
  */
-Array arraySubArray(Array a, int from, int to);
+Array arraySubArray(const Array a, int from, int to);
 
 
 
@@ -95,7 +86,7 @@ void arrayClear(Array a);
  * \return true if empty, false if not.
  *
  */
-bool arrayIsEmpty(Array a);
+bool arrayIsEmpty(const Array a);
 
 /** \brief Returns the length of the array.
  *
@@ -103,7 +94,7 @@ bool arrayIsEmpty(Array a);
  * \return Number of elements.
  *
  */
-int arrayLength(Array a);
+int arrayLength(const Array a);
 
 
 
@@ -124,7 +115,7 @@ void arrayTrimCapacity(Array a);
  * \return true if found, false otherwise.
  *
  */
-bool arrayContains(Array a, Ptr data);
+bool arrayContains(const Array a, const Ptr data);
 
 /** \brief Returns the index of the first occurrence of an element in the array, arrayComparable must have been called or the vector must have been created with a EL_* constant.
  *
@@ -133,7 +124,7 @@ bool arrayContains(Array a, Ptr data);
  * \return first index if found, -1 otherwise.
  *
  */
-int arrayIndexOf(Array a, Ptr data);
+int arrayIndexOf(const Array a, const Ptr data);
 
 /** \brief Returns the index of the last occurrence of an element in the array, arrayComparable must have been called or the vector must have been created with a EL_* constant.
  *
@@ -143,7 +134,7 @@ int arrayIndexOf(Array a, Ptr data);
  *
  */
 
-int arrayLastIndexOf(Array a, Ptr data);
+int arrayLastIndexOf(const Array a, const Ptr data);
 
 
 
@@ -151,10 +142,10 @@ int arrayLastIndexOf(Array a, Ptr data);
  *
  * \param a : Array to seek in.
  * \param pos : Position of the element, 0 is start.
- * \return Pointer to data. /!\ Don't use the macro if multithreaded : the pointer returned needs a free.
+ * \return Pointer to data.
  *
  */
-Ptr arrayGet_base(Array a, int pos);
+const Ptr arrayGet_base(const Array a, int pos);
 #define arrayGet(a, pos, type) (*(type*)arrayGet_base(a, pos))
 
 
@@ -167,7 +158,7 @@ Ptr arrayGet_base(Array a, int pos);
  * \return nothing.
  *
  */
-void arraySet_base(Array a, int pos, Ptr data);
+void arraySet_base(Array a, int pos, const Ptr data);
 #define arraySet(a, pos, data) arraySet_base(a, pos, &(data))
 
 
@@ -179,7 +170,7 @@ void arraySet_base(Array a, int pos, Ptr data);
  * \return nothing.
  *
  */
-void arrayPush_base(Array a, Ptr data);
+void arrayPush_base(Array a, const Ptr data);
 #define arrayPush(a, data) arrayPush_base(a, &(data))
 
 /** \brief Adds an element at a given position in an array (Not primitive).
@@ -190,7 +181,7 @@ void arrayPush_base(Array a, Ptr data);
  * \return nothing.
  *
  */
-void arrayAdd_base(Array a, int pos, Ptr data);
+void arrayAdd_base(Array a, int pos, const Ptr data);
 #define arrayAdd(a, pos, data) arrayAdd_base(a, pos, &(data))
 
 
@@ -239,7 +230,7 @@ void arrayRandomize(Array a);
  * \return nothing.
  *
  */
-void arrayDump(Array a);
+void arrayDump(const Array a);
 
 
 
@@ -258,7 +249,7 @@ typedef struct {
  * \return Iterator on this array.
  *
  */
-ArrayIt arrayItNew(Array a);
+ArrayIt arrayItNew(const Array a);
 
 /** \brief Creates an iterator on the array (Starting with the last element).
  *
@@ -266,7 +257,7 @@ ArrayIt arrayItNew(Array a);
  * \return Iterator on this array.
  *
  */
-ArrayIt arrayItNewBack(Array a);
+ArrayIt arrayItNewBack(const Array a);
 
 
 
@@ -276,7 +267,7 @@ ArrayIt arrayItNewBack(Array a);
  * \return true if element exists, false otherwise.
  *
  */
-bool arrayItExists(ArrayIt *it);
+bool arrayItExists(const ArrayIt *it);
 
 
 
@@ -304,7 +295,7 @@ void arrayItPrev(ArrayIt *it);
  * \return element.
  *
  */
-Ptr arrayItGet_base(ArrayIt *it);
+const Ptr arrayItGet_base(const ArrayIt *it);
 #define arrayItGet(it, type) (*(type*)arrayItGet_base(it))
 
 
@@ -315,7 +306,7 @@ Ptr arrayItGet_base(ArrayIt *it);
  * \return nothing.
  *
  */
-void arrayItSet_base(ArrayIt *it, Ptr data);
+void arrayItSet_base(ArrayIt *it, const Ptr data);
 #define arrayItSet(it, data) arrayItSet_base(it, &(data))
 
 
@@ -327,7 +318,7 @@ void arrayItSet_base(ArrayIt *it, Ptr data);
  * \return nothing.
  *
  */
-void arrayItAddAfter_base(ArrayIt *it, Ptr data);
+void arrayItAddAfter_base(ArrayIt *it, const Ptr data);
 /** Automatic macro to send the address of data to arrayItAddAfter_base */
 #define arrayItAddAfter(it, data) arrayItAddAfter_base(it, &(data))
 
@@ -338,7 +329,7 @@ void arrayItAddAfter_base(ArrayIt *it, Ptr data);
  * \return nothing.
  *
  */
-void arrayItAddBefore_base(ArrayIt *it, Ptr data);
+void arrayItAddBefore_base(ArrayIt *it, const Ptr data);
 /** Automatic macro to send the address of data to arrayItAddBefore_base */
 #define arrayItAddBefore(it, data) arrayItAddBefore_base(it, &(data))
 
