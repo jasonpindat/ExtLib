@@ -2,7 +2,7 @@
  * \file Heap.h
  * \brief Primitives functions for heaps
  * \author Jason Pindat
- * \date 2016-11-24
+ * \date 2016-11-26
  *
  * All the basic functions to manage heaps.
  * Heap is a Collection but is not Iterable
@@ -28,7 +28,7 @@ typedef struct _Heap *Heap;
  * \return New empty heap.
  *
  */
-Heap heapNew(int elemSize, ElCmpFct cmpFct);
+Heap heapNew(int elemSize);
 
 /** \brief Destroys a heap and all its content (Not primitive).
  *
@@ -40,14 +40,14 @@ void heapDel(Heap h);
 
 
 
-/** \brief Sets whether the heap can be accessed for reading by multiple threads.
+/** \brief Sets the function to compare 2 elements of this heap, note that if you declared the heap with EL_*, the comparison function of the specified type is automatically linked. Otherwise, a function must be provided.
  *
- * \param h : Heap.
- * \param multithread : boolean value to allow multithreaded access.
+ * \param h : Heap in which you set the fonction.
+ * \param fct : pointer to the function, the function must take 2 pointers to the data and return an int which is <0 if 1st value is lower tha 2nd, >0 for the opposite and =0 if 1st value equals 2nd value.
  * \return nothing.
  *
  */
-void heapMultithread(Heap h, bool multithread);
+void heapComparable(Heap h, ElCmpFct fct);
 
 
 
@@ -57,7 +57,7 @@ void heapMultithread(Heap h, bool multithread);
  * \return Copy of the heap
  *
  */
-Heap heapClone(Heap h);
+Heap heapClone(const Heap h);
 
 
 
@@ -77,7 +77,7 @@ void heapClear(Heap h);
  * \return true if empty, false if not.
  *
  */
-bool heapIsEmpty(Heap h);
+bool heapIsEmpty(const Heap h);
 
 /** \brief Returns the length of the heap.
  *
@@ -85,7 +85,7 @@ bool heapIsEmpty(Heap h);
  * \return Number of elements.
  *
  */
-int heapLength(Heap h);
+int heapLength(const Heap h);
 
 
 
@@ -95,7 +95,7 @@ int heapLength(Heap h);
  * \return Pointer to data.
  *
  */
-Ptr heapGet_base(Heap h);
+const Ptr heapGet_base(const Heap h);
 /** Automatic cast macro to translate Ptr returned by heapGet_base into type */
 #define heapGet(h, type) (*(type*)heapGet_base(h))
 
@@ -108,7 +108,7 @@ Ptr heapGet_base(Heap h);
  * \return The same vector.
  *
  */
-void heapPush_base(Heap h, Ptr data);
+void heapPush_base(Heap h, const Ptr data);
 /** Automatic macro to send the address of data to heapPush_base */
 #define heapPush(h, data) heapPush_base(h, &(data))
 
@@ -121,6 +121,16 @@ void heapPush_base(Heap h, Ptr data);
  *
  */
 void heapPop(Heap h);
+
+
+
+/** \brief Details the heap usage of a given heap
+ *
+ * \param h : Heap to dump.
+ * \return nothing.
+ *
+ */
+void heapDump(const Heap h);
 
 
 

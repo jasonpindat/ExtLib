@@ -1,103 +1,98 @@
 /**
  * \file Heap.c
  * \author Jason Pindat
- * \date 2016-11-24
+ * \date 2016-11-26
  *
  * Copyright 2014-2016
  *
  */
 
 #include "ExtLib/Common.h"
+#include "ExtLib/Collection.h"
 #include "ExtLib/Heap.h"
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define DEFSIZE 8
 
 struct _Heap {
     RealType type;
     int elemSize;
+    ElCmpFct cmpFct;
     ElCopyFct copyFct;
     ElDelFct delFct;
+    bool needsAllocation;
+    Ptr (*ptrTransform)(Ptr);
 
     unsigned int length;
-    ElCmpFct cmpFct;
-    Ptr temp;
-
-    bool multithread;
 
 	unsigned int size;
-    Ptr data;
+    Ptr *data;
 };
 
 
 
-Heap heapNew(int elemSize, ElCmpFct cmpFct) {
+Heap heapNew(int elemSize) {
     Heap h = malloc(sizeof(struct _Heap));
 
     h->type = HEAP;
 
-    /*if(elemSize<=0) {
+    if(elemSize<=0) {
         h->elemSize=_elSizeFct(elemSize);
         h->cmpFct=_elCompareFct(elemSize);
     }
-    else {*/
+    else {
         h->elemSize=elemSize;
-        /*h->cmpFct=NULL;
-    }*/
+        h->cmpFct=NULL;
+    }
 
-    h->copyFct = NULL;
-    h->delFct = NULL;
+    collectionElementInstanciable((Collection)h, NULL, NULL);
 
-    h->temp = malloc(h->elemSize);
     h->length = 0;
 
     h->size = DEFSIZE;
-    h->data = malloc(DEFSIZE*h->elemSize);
-    h->cmpFct = cmpFct;
+    h->data = malloc(DEFSIZE * sizeof(Ptr));
 
 	return h;
 }
 
 void heapDel(Heap h) {
-    if(h->delFct)
-        for(int i=0; i<h->length; i++)
-            h->delFct(h->data + i*h->elemSize);
+    heapClear(h);
 
-    free(h->temp);
     free(h->data);
     free(h);
 }
 
 
 
-void heapMultithread(Heap h, bool multithread) {
-    h->multithread = multithread;
+void heapComparable(Heap h, ElCmpFct fct) {
+    h->cmpFct = fct;
 }
 
 
 
-Heap heapClone(Heap h) {
+Heap heapClone(const Heap h) {
     Heap h2 = malloc(sizeof(struct _Heap));
 
-    h->type = HEAP;
-
+    h2->type = HEAP;
+    h2->elemSize = h->elemSize;
+    h2->cmpFct = h->cmpFct;
     h2->copyFct = h->copyFct;
     h2->delFct = h->delFct;
-    h2->cmpFct = h->cmpFct;
-    h2->length = h->length;
-    h2->size = h2->length * 2;
-    h2->elemSize = h->elemSize;
-    h2->temp = malloc(h2->elemSize);
-    h2->data = malloc(h2->size * h2->elemSize);
+    h2->needsAllocation = h->needsAllocation;
+    h2->ptrTransform = h->ptrTransform;
 
-    if(h2->copyFct) {
-        for(int i=0; i<h2->length; i++)
-            h2->copyFct(h2->data + i*h2->elemSize, h->data + i*h2->elemSize);
-    }
-    else
-        memcpy(h2->data, h->data, h2->length*h2->elemSize);
+    h2->length = 0;
+
+    h2->size = h->length * 2;
+    if(h2->size < DEFSIZE)
+        h2->size = DEFSIZE;
+    h2->data = malloc(h2->size * sizeof(Ptr));
+
+    for(int i=0; i<h->length; i++)
+        heapPush_base(h2, h->ptrTransform(&h->data[i]));
 
     return h2;
 }
@@ -105,77 +100,68 @@ Heap heapClone(Heap h) {
 
 
 void heapClear(Heap h) {
-    if(h->delFct)
-        for(int i=0; i<h->length; i++)
-            h->delFct(h->data + i*h->elemSize);
+    if(h->needsAllocation) {
+        for(int i=0; i<h->length; i++) {
+            if(h->delFct)
+                h->delFct(h->data[i]);
+
+            free(h->data[i]);
+        }
+    }
 
     h->length = 0;
+    h->size = DEFSIZE;
+    h->data = realloc(h->data, DEFSIZE * sizeof(Ptr));
 }
 
 
 
-bool heapIsEmpty(Heap h) {
+bool heapIsEmpty(const Heap h) {
     return h->length == 0;
 }
 
-int heapLength(Heap h) {
+int heapLength(const Heap h) {
     return h->length;
 }
 
 
 
-Ptr heapGet_base(Heap h) {
-    if(h->copyFct) {
-        if(h->multithread) {
-            Ptr temp = malloc(h->elemSize);
-            h->copyFct(temp, h->data);
-            return temp;
-        }
-        else {
-            h->copyFct(h->temp, h->data);
-            return h->temp;
-        }
-    }
-    else
-        return h->data;
+const Ptr heapGet_base(const Heap h) {
+    return h->ptrTransform(&h->data[0]);
 }
 
 
 
-void heapPush_base(Heap h, Ptr value)
+void heapPush_base(Heap h, const Ptr value)
 {
 	unsigned int index, parent;
 
-	// Resize the heap if it is too small to hold all the data
-	if (h->length == h->size)
-	{
-		h->size <<= 1;
-		h->data = realloc(h->data, h->elemSize * h->size);
+	if (h->length >= h->size) {
+		h->size *= 2;
+		h->data = realloc(h->data, h->size*sizeof(Ptr));
 	}
 
 	// Find out where to put the element and put it
-	for(index = h->length++; index; index = parent)
+	for(index = h->length++; index != 0; index = parent)
 	{
-		parent = (index - 1) >> 1;
+		parent = (index - 1) / 2;
 
-		if (h->cmpFct(h->data+parent*h->elemSize, value) >= 0)
+		if(h->cmpFct(h->ptrTransform(&h->data[parent]), value) >= 0)
             break;
 
-		//h->data[index] = h->data[parent];
-		if(h->copyFct)
-            h->copyFct(h->data+index*h->elemSize, h->data+parent*h->elemSize);
-        else
-            memcpy(h->data+index*h->elemSize, h->data+parent*h->elemSize, h->elemSize);
-
-        if(h->delFct)
-            h->delFct(h->data+parent*h->elemSize);
+		h->data[index] = h->data[parent];
 	}
 
-	//h->data[index] = value;
-	if(h->copyFct)
-        h->copyFct(h->data+index*h->elemSize, value);
-    else
-        memcpy(h->data+index*h->elemSize, value, h->elemSize);
+	if(h->needsAllocation) {
+        h->data[index] = malloc(h->elemSize);
+
+        if(h->copyFct)
+            h->copyFct(h->data[index], value);
+        else
+            memcpy(h->data[index], value, h->elemSize);
+	}
+	else
+        memcpy(&h->data[index], value, h->elemSize);
 }
 
 
@@ -184,52 +170,64 @@ void heapPop(Heap h)
 {
 	unsigned int index, swap, other;
 
-	// Remove the biggest element
-	Ptr temp = h->data+(--h->length)*h->elemSize;
+    if(h->needsAllocation) {
+        if(h->delFct)
+            h->delFct(h->data[0]);
 
-	// Resize the heap if it's consuming too much memory
-	if ((h->length <= (h->size >> 2)) && (h->size > DEFSIZE))
-	{
-		h->size >>= 1;
-		h->data = realloc(h->data, h->elemSize * h->size);
-	}
+        free(h->data[0]);
+    }
+
+	h->length--;
+
+	Ptr temp = h->ptrTransform(&h->data[h->length]);
 
 	// Reorder the elements
-	for(index = 0; 1; index = swap)
+	for(index = 0; true; index = swap)
 	{
 		// Find the child to swap with
-		swap = (index << 1) + 1;
+		swap = (index * 2) + 1;
 
 		if (swap >= h->length)
             break; // If there are no children, the heap is reordered
 
 		other = swap + 1;
-		if ((other < h->length) && h->cmpFct(h->data+other*h->elemSize, h->data+swap*h->elemSize) >= 0)
+		if ((other < h->length) && h->cmpFct(h->ptrTransform(&h->data[other]), h->ptrTransform(&h->data[swap])) >= 0)
             swap = other;
 
-		if (h->cmpFct(temp, h->data+swap*h->elemSize) >= 0)
+		if (h->cmpFct(temp, h->ptrTransform(&h->data[swap])) >= 0)
             break; // If the bigger child is less than or equal to its parent, the heap is reordered
 
-		//h->data[index] = h->data[swap];
-		if(h->delFct)
-            h->delFct(h->data+index*h->elemSize);
-
-		if(h->copyFct)
-            h->copyFct(h->data+index*h->elemSize, h->data+swap*h->elemSize);
-        else
-            memcpy(h->data+index*h->elemSize, h->data+swap*h->elemSize, h->elemSize);
+		h->data[index] = h->data[swap];
 	}
-	//h->data[index] = temp;
-	if(h->delFct)
-        h->delFct(h->data+index*h->elemSize);
 
-	if(h->copyFct)
-        h->copyFct(h->data+index*h->elemSize, temp);
-    else
-        memcpy(h->data+index*h->elemSize, temp, h->elemSize);
+	h->data[index] = h->data[h->length];
 
-    if(h->delFct)
-        h->delFct(temp);
+
+    if ((h->length <= (h->size / 4)) && (h->size / 2 >= DEFSIZE)) {
+		h->size /= 2;
+		h->data = realloc(h->data, h->size * sizeof(Ptr));
+	}
+}
+
+
+
+void heapDump(const Heap h) {
+    int elts=heapLength(h);
+    int effcost=elts*h->elemSize;
+    int opcost=sizeof(struct _Heap);
+    if(h->needsAllocation)
+        opcost += h->size*sizeof(Ptr);
+    int preallcost=(h->size-elts)*h->elemSize;
+
+    printf("Heap at %p\n", h);
+    printf("\t%d elements, each using %d bytes\n", elts, h->elemSize);
+    printf("\t%d bytes used for elements\n", effcost);
+    printf("\t%d bytes used as operating cost\n", opcost);
+    printf("\t%d bytes used as preallocated\n", preallcost);
+    printf("\t%d bytes total used\n", effcost+opcost+preallcost);
+
+    /*for(int i=0; i<h->length; i++)
+        printf("%d\n", *((int*)h->ptrTransform(&h->data[i])));*/
 }
 
 

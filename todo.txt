@@ -16,10 +16,7 @@ Skip list
 
 --
 
-Test List, test String, test Heap a faire
+Test List, SimpleList, String, Heap a faire
 String : indexOf à tester
 
-SimpleList.h fait
-Continuer SimpleList.c après simpleListContains
-
-Tester Multithread en lecture (Array, List et SimpleList)
+Rendre heap possible en min et max

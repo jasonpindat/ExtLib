@@ -4,134 +4,113 @@
 
 #define HASH_SIZE 13 // prime number
 
-struct Cell {
+struct _HashNode { 
+    HashNode next;
     void *data;
-    struct Cell *next, *prev;
 };
 
-struct Hash_Table {
+struct _Hash {
     int (*cmp)(void *, void *);
-    int (*hash)(void *);
-    struct Cell **entry;
+    int (*hashFct)(void *);
     int size;
+    HashNode *ct;
 };
 
-static struct Cell *hash_new_cell(void *data) {
-    struct Cell *c = malloc(sizeof(*c));
-    c->data = data;
-    c->next = c->prev = NULL;
-    return c;
-}
 
-struct Hash_Table *hash_init(int (*cmp)(void *, void *), int (*hash)(void *)) {
-    struct Hash_Table *hasht;
-    int i;
+
+Hash hash_init(int (*cmp)(void *, void *), int (*hashFct)(void *)) {
 
     assert(cmp != NULL);
-    assert(hash != NULL);
+    assert(hashFct != NULL);
 
-    hasht = malloc(sizeof(*hasht));
-    if (hasht == NULL)
-        return NULL;
+    Hash h = malloc(sizeof(struct _Hash));
+    h->cmp = cmp;
+    h->hashFct = hashFct;
+    h->size=HASH_SIZE;
+    h->ct = malloc(sizeof(HashNode) * HASH_SIZE);
 
-    hasht->cmp = cmp;
-    hasht->hash = hash;
-    hasht->entry = malloc(sizeof(*(hasht->entry)) * HASH_SIZE);
+    for(int i=0; i<HASH_SIZE; ++i)
+        h->ct[i] = NULL;
 
-    if (hasht->entry == NULL) {
-        free(hasht);
-        return NULL;
+    return h;
+}
+
+bool hash_add(Hash h, void *data) {
+    
+    int index = h->hashFct(data)%h->size;
+
+    HashNode nodeSave = NULL;
+    HashNode node = h->ct[index];
+    int cmpRes;
+
+    while((node != NULL) && ((cmpRes=h->cmp(data, node->data)) > 0)) {
+        nodeSave = node;
+        node = node->next;
     }
 
-    hasht->size=HASH_SIZE;
+    if(node != NULL && cmpRes == 0)
+        return false;
 
-    for(i=0; i<hasht->size; ++i)
-        hasht->entry[i] = NULL;
+    HashNode newnode = malloc(sizeof(struct _HashNode));
+    newnode->data = data;
+    newnode->next = node;
 
-    return hasht;
+    if(nodeSave == NULL)
+        h->ct[index] = newnode;
+    else
+        nodeSave->next = newnode;
+
+    return true;
 }
 
-int hash_add(struct Hash_Table *hash, void *data) { // A faire : gerer le cas si l'élément existe déja
-    int value;
-    int c;
+void *hash_get(Hash h, void *data) {
+    int cmpRes;
 
-    assert(hash != NULL);
-    value = hash->hash(data);
-    fprintf(stderr,"DEBUG: hash value is %d \n",value);
+    HashNode node = h->ct[h->hashFct(data)%h->size];
 
-    if (hash->entry[value%hash->size] == NULL) {
-        hash->entry[value%hash->size] = hash_new_cell(data);
+    while((node != NULL) && ((cmpRes=h->cmp(data, node->data)) > 0))
+        node = node->next;
+
+    if(node != NULL && cmpRes == 0)
+        return node->data;
+
+    return NULL;
+}
+
+bool hash_remove(Hash h, void *data) {
+
+    int index = h->hashFct(data)%h->size;
+
+    HashNode nodeSave = NULL;
+    HashNode node = h->ct[index];
+    int cmpRes;
+
+    while((node != NULL) && ((cmpRes=h->cmp(data, node->data)) > 0)) {
+        nodeSave = node;
+        node = node->next;
     }
-    else {
-        struct Cell *q=NULL, *p=hash->entry[value%hash->size];
 
-        while((p != NULL) && ((c=hash->cmp(data,p->data)) > 0)) {
-            q=p;
-            p=p->next;
-        }
-        if (c == 0)
-            return 1; // element is already in the table
+    if(node == NULL || cmpRes != 0)
+        return false;
 
-        struct Cell *cell = hash_new_cell(data);
+    if(nodeSave == NULL)
+        h->ct[index] = node->next;
+    else
+        nodeSave->next = node->next;
 
-        if (q == NULL) {
-            p->prev = cell;
-            cell->next = p;
-            hash->entry[value%hash->size] = cell;
-        }
-        else {
-            q->next = cell;
-            cell->prev = q;
-        }
-    }
-    return 0;
+    free(node);
+
+    return true;
 }
 
-int hash_get(struct Hash_Table *hash, void *data) {
-    int r=0, value;
+void hash_free(Hash h, void (*release)(void *)) {
 
-    assert(hash!=NULL);
-
-    value=hash->hash(data);
-    struct Cell *p = hash->entry[value%hash->size];
-
-    while((p!=NULL) && (r=hash->cmp(data,p->data)<0))
-        p=p->next;
-    if (r==0)
-        return 0;
-    /*if (p==NULL)
-        return 1;*/
-    return 1;
-}
-
-int hash_remove(struct Hash_Table *hash, void *data) {
-    int r=0, value;
-
-    assert(hash!=NULL);
-
-    value=hash->hash(data);
-    struct Cell *p = hash->entry[value%hash->size];
-
-    while((p!=NULL) && (r=hash->cmp(data,p->data)<0))
-        p=p->next;
-    if (r==0)
-        return 0;
-    /*if (p==NULL)
-        return 1;*/
-    return 1;
-}
-
-void hash_free(struct Hash_Table *hash, void (*release)(void *)) {
-    int i;
-
-    assert(hash!=NULL);
-
-    for(i=0; i<hash->size; ++i)
-    {
-        struct Cell *p=hash->entry[i];
+    for(int i=0; i<h->size; ++i) {
+        
+        HashNode p=h->ct[i];
 
         while(p) {
-            struct Cell *ptr = p->next;
+            HashNode ptr = p->next;
 
             if(release!=NULL)
                 release(p->data);
@@ -142,6 +121,6 @@ void hash_free(struct Hash_Table *hash, void (*release)(void *)) {
         }
     }
 
-    free(hash->entry);
-    free(hash);
+    free(h->ct);
+    free(h);
 }

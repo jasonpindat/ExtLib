@@ -1,13 +1,14 @@
 /**
  * \file List.c
  * \author Jason Pindat
- * \date 2016-05-16
+ * \date 2016-11-26
  *
  * Copyright 2014-2016
  *
  */
 
 #include "ExtLib/Common.h"
+#include "ExtLib/Collection.h"
 #include "ExtLib/List.h"
 
 #include <stdio.h>
@@ -17,19 +18,19 @@
 struct _List {
     RealType type;
     int elemSize;
+    ElCmpFct cmpFct;
     ElCopyFct copyFct;
     ElDelFct delFct;
+    bool needsAllocation;
+    Ptr (*ptrTransform)(Ptr);
 
     int length;
-    ElCmpFct cmpFct;
-    Ptr temp;
 
     ListNode first;
     ListNode last;
 };
 
 struct _ListNode {
-    Ptr data;
     ListNode next;
     ListNode prev;
 };
@@ -50,10 +51,8 @@ List listNew(int elemSize) {
         l->cmpFct=NULL;
     }
 
-    l->copyFct = NULL;
-    l->delFct = NULL;
+    collectionElementInstanciable((Collection)l, NULL, NULL);
 
-    l->temp = malloc(l->elemSize);
     l->length = 0;
 
     l->first = NULL;
@@ -64,8 +63,7 @@ List listNew(int elemSize) {
 
 void listDel(List l) {
     listClear(l);
-    if(l->temp)
-        free(l->temp);
+
     free(l);
 }
 
@@ -75,34 +73,19 @@ void listComparable(List l, ElCmpFct fct) {
     l->cmpFct = fct;
 }
 
-void listMultithread(List l, bool multithread) {
-    if(multithread) {
-        if(l->temp) {
-            free(l->temp);
-            l->temp = NULL;
-        }
-    }
-    else {
-        if(!l->temp)
-            l->temp = malloc(l->elemSize);
-    }
-}
 
 
-
-List listClone(List l) {
+List listClone(const List l) {
     List l2 = listNew(l->elemSize);
 
     l2->cmpFct = l->cmpFct;
-    l2->copyFct = l->copyFct;
-    l2->delFct = l->delFct;
 
-    listMultithread(l2, !l->temp);
+    collectionElementInstanciable((Collection)l2, l->copyFct, l->delFct);
 
     ListNode node = l->first;
 
     while(node) {
-        listAddLast_base(l2, node->data);
+        listAddLast_base(l2, node+sizeof(struct _ListNode));
         node = node->next;
     }
 
@@ -116,8 +99,9 @@ void listClear(List l) {
     ListNode nodeSave;
 
     while(node) {
+
         if(l->delFct)
-            l->delFct(node->data);
+            l->delFct(node+sizeof(struct _ListNode));
 
         nodeSave = node;
         node = node->next;
@@ -131,21 +115,21 @@ void listClear(List l) {
 
 
 
-bool listIsEmpty(List l) {
+bool listIsEmpty(const List l) {
     return !l->first;
 }
 
-int listLength(List l) {
+int listLength(const List l) {
     return l->length;
 }
 
 
 
-bool listContains(List l, Ptr data) {
+bool listContains(const List l, const Ptr data) {
     ListNode node = l->first;
 
     while(node) {
-        if(l->cmpFct(node->data, data) == 0)
+        if(l->cmpFct(node+sizeof(struct _ListNode), data) == 0)
             return true;
 
         node = node->next;
@@ -156,66 +140,40 @@ bool listContains(List l, Ptr data) {
 
 
 
-Ptr listGetFirst_base(List l) {
-    if(l->copyFct) {
-        if(!l->temp) {
-            Ptr temp = malloc(l->elemSize);
-            l->copyFct(temp, l->first->data);
-            return temp;
-        }
-        else {
-            l->copyFct(l->temp, l->first->data);
-            return l->temp;
-        }
-    }
-    else
-        return l->first->data;
+const Ptr listGetFirst_base(const List l) {
+    return l->first+sizeof(struct _ListNode);
 }
 
-Ptr listGetLast_base(List l) {
-    if(l->copyFct) {
-        if(!l->temp) {
-            Ptr temp = malloc(l->elemSize);
-            l->copyFct(temp, l->last->data);
-            return temp;
-        }
-        else {
-            l->copyFct(l->temp, l->last->data);
-            return l->temp;
-        }
-    }
-    else
-        return l->last->data;
+const Ptr listGetLast_base(const List l) {
+    return l->last+sizeof(struct _ListNode);
 }
 
 
 
-void listSetFirst_base(List l, Ptr data) {
+void listSetFirst_base(List l, const Ptr data) {
     if(l->delFct)
-        l->delFct(l->first->data);
+        l->delFct(l->first+sizeof(struct _ListNode));
 
     if(l->copyFct)
-        l->copyFct(l->first->data, data);
+        l->copyFct(l->first+sizeof(struct _ListNode), data);
     else
-        memcpy(l->first->data, data, l->elemSize);
+        memcpy(l->first+sizeof(struct _ListNode), data, l->elemSize);
 }
 
-void listSetLast_base(List l, Ptr data) {
+void listSetLast_base(List l, const Ptr data) {
     if(l->delFct)
-        l->delFct(l->last->data);
+        l->delFct(l->last+sizeof(struct _ListNode));
 
     if(l->copyFct)
-        l->copyFct(l->last->data, data);
+        l->copyFct(l->last+sizeof(struct _ListNode), data);
     else
-        memcpy(l->last->data, data, l->elemSize);
+        memcpy(l->last+sizeof(struct _ListNode), data, l->elemSize);
 }
 
 
 
-void listAddFirst_base(List l, Ptr data) {
-    void *memory = malloc(sizeof(struct _ListNode) + l->elemSize);
-
-    ListNode node = memory;
+void listAddFirst_base(List l, const Ptr data) {
+    ListNode node = malloc(sizeof(struct _ListNode) + l->elemSize);
 
     node->next = l->first;
     l->first = node;
@@ -226,20 +184,16 @@ void listAddFirst_base(List l, Ptr data) {
     else
         l->last = node;
 
-    node->data = memory + sizeof(struct _ListNode);
-
     if(l->copyFct)
-        l->copyFct(node->data, data);
+        l->copyFct(node+sizeof(struct _ListNode), data);
     else
-        memcpy(node->data, data, l->elemSize);
+        memcpy(node+sizeof(struct _ListNode), data, l->elemSize);
 
     l->length++;
 }
 
-void listAddLast_base(List l, Ptr data) {
-    void *memory = malloc(sizeof(struct _ListNode) + l->elemSize);
-
-    ListNode node = memory;
+void listAddLast_base(List l, const Ptr data) {
+    ListNode node = malloc(sizeof(struct _ListNode) + l->elemSize);
 
     node->prev = l->last;
     l->last = node;
@@ -250,12 +204,10 @@ void listAddLast_base(List l, Ptr data) {
     else
         l->first = node;
 
-    node->data = memory + sizeof(struct _ListNode);
-
     if(l->copyFct)
-        l->copyFct(node->data, data);
+        l->copyFct(node+sizeof(struct _ListNode), data);
     else
-        memcpy(node->data, data, l->elemSize);
+        memcpy(node+sizeof(struct _ListNode), data, l->elemSize);
 
     l->length++;
 }
@@ -273,7 +225,7 @@ void listRemoveFirst(List l) {
         l->last = NULL;
 
     if(l->delFct)
-        l->delFct(node->data);
+        l->delFct(node+sizeof(struct _ListNode));
 
     free(node);
 
@@ -291,7 +243,7 @@ void listRemoveLast(List l) {
         l->first = NULL;
 
     if(l->delFct)
-        l->delFct(node->data);
+        l->delFct(node+sizeof(struct _ListNode));
 
     free(node);
 
@@ -320,7 +272,7 @@ void listSort(List l, int method) {
                     // Left empty, take right OR Right empty, take left, OR compare.
                     if (!leftSize)                  {next=right;right=right->next;rightSize--;}
                     else if (!rightSize || !right)  {next=left;left=left->next;leftSize--;}
-                    else if (method*fct(left->data,right->data)<0)     {next=left;left=left->next;leftSize--;}
+                    else if (method*fct(left+sizeof(struct _ListNode),right+sizeof(struct _ListNode))<0)     {next=left;left=left->next;leftSize--;}
                     else                            {next=right;right=right->next;rightSize--;}
                     // Update pointers to keep track of where we are:
                     if (tail) tail->next=next;  else first=next;
@@ -341,7 +293,7 @@ void listSort(List l, int method) {
 
 
 
-void listDump(List l) {
+void listDump(const List l) {
     int elts = l->length;
     int effcost = elts*l->elemSize;
     int opcost = sizeof(struct _List) + elts*sizeof(struct _ListNode);
@@ -357,7 +309,7 @@ void listDump(List l) {
 
 // Iteration
 
-ListIt listItNew(List l) {
+ListIt listItNew(const List l) {
     ListIt it;
 
     it.list = l;
@@ -366,7 +318,7 @@ ListIt listItNew(List l) {
     return it;
 }
 
-ListIt listItNewBack(List l) {
+ListIt listItNewBack(const List l) {
     ListIt it;
 
     it.list = l;
@@ -377,7 +329,7 @@ ListIt listItNewBack(List l) {
 
 
 
-bool listItExists(ListIt *it) {
+bool listItExists(const ListIt *it) {
     return it->node != NULL;
 }
 
@@ -393,40 +345,26 @@ void listItPrev(ListIt *it) {
 
 
 
-Ptr listItGet_base(ListIt *it) {
-    if(it->list->copyFct) {
-        if(!it->list->temp) {
-            Ptr temp = malloc(it->list->elemSize);
-            it->list->copyFct(temp, it->node->data);
-            return temp;
-        }
-        else {
-            it->list->copyFct(it->list->temp, it->node->data);
-            return it->list->temp;
-        }
-    }
-    else
-        return it->node->data;
+const Ptr listItGet_base(const ListIt *it) {
+    return it->node+sizeof(struct _ListNode);
 }
 
 
 
-void listItSet_base(ListIt *it, Ptr data) {
+void listItSet_base(ListIt *it, const Ptr data) {
     if(it->list->delFct)
-        it->list->delFct(it->node->data);
+        it->list->delFct(it->node+sizeof(struct _ListNode));
 
     if(it->list->copyFct)
-        it->list->copyFct(it->node->data, data);
+        it->list->copyFct(it->node+sizeof(struct _ListNode), data);
     else
-        memcpy(it->node->data, data, it->list->elemSize);
+        memcpy(it->node+sizeof(struct _ListNode), data, it->list->elemSize);
 }
 
 
 
-void listItAddAfter_base(ListIt *it, Ptr data) {
-    void *memory = malloc(sizeof(struct _ListNode) + it->list->elemSize);
-
-    ListNode newnode = memory;
+void listItAddAfter_base(ListIt *it, const Ptr data) {
+    ListNode newnode = malloc(sizeof(struct _ListNode) + it->list->elemSize);
 
     newnode->next = it->node->next;
     it->node->next = newnode;
@@ -437,20 +375,16 @@ void listItAddAfter_base(ListIt *it, Ptr data) {
     else
         it->list->last = newnode;
 
-    newnode->data = memory + sizeof(struct _ListNode);
-
     if(it->list->copyFct)
-        it->list->copyFct(newnode->data, data);
+        it->list->copyFct(newnode+sizeof(struct _ListNode), data);
     else
-        memcpy(newnode->data, data, it->list->elemSize);
+        memcpy(newnode+sizeof(struct _ListNode), data, it->list->elemSize);
 
     it->list->length++;
 }
 
-void listItAddBefore_base(ListIt *it, Ptr data) {
-    void *memory = malloc(sizeof(struct _ListNode) + it->list->elemSize);
-
-    ListNode newnode = memory;
+void listItAddBefore_base(ListIt *it, const Ptr data) {
+    ListNode newnode = malloc(sizeof(struct _ListNode) + it->list->elemSize);
 
     newnode->prev = it->node->prev;
     it->node->prev = newnode;
@@ -461,12 +395,10 @@ void listItAddBefore_base(ListIt *it, Ptr data) {
     else
         it->list->first = newnode;
 
-    newnode->data = memory + sizeof(struct _ListNode);
-
     if(it->list->copyFct)
-        it->list->copyFct(newnode->data, data);
+        it->list->copyFct(newnode+sizeof(struct _ListNode), data);
     else
-        memcpy(newnode->data, data, it->list->elemSize);
+        memcpy(newnode+sizeof(struct _ListNode), data, it->list->elemSize);
 
     it->list->length++;
 }
@@ -489,7 +421,7 @@ void listItRemove(ListIt *it) {
     it->node = node->next;
 
     if(it->list->delFct)
-        it->list->delFct(node->data);
+        it->list->delFct(node+sizeof(struct _ListNode));
 
     free(node);
 }
@@ -500,7 +432,7 @@ void listForEach(List l, ElActFct actFct, Ptr infos) {
     ListNode node = l->first;
 
     while(node) {
-        actFct(node->data, infos);
+        actFct(node+sizeof(struct _ListNode), infos);
         node = node->next;
     }
 }

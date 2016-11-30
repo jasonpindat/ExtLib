@@ -51,15 +51,6 @@ void simpleListDel(SimpleList l);
  */
 void simpleListComparable(SimpleList l, ElCmpFct fct);
 
-/** \brief Sets whether the list can be accessed for reading by multiple threads.
- *
- * \param l : SimpleList.
- * \param multithread : boolean value to allow multithreaded access.
- * \return nothing.
- *
- */
-void simpleListMultithread(SimpleList l, bool multithread);
-
 
 
 /** \brief Copies a list and all its content.
@@ -68,7 +59,7 @@ void simpleListMultithread(SimpleList l, bool multithread);
  * \return Copy of the list
  *
  */
-SimpleList simpleListClone(SimpleList l);
+SimpleList simpleListClone(const SimpleList l);
 
 
 
@@ -88,7 +79,7 @@ void simpleListClear(SimpleList l);
  * \return true if empty, false if not.
  *
  */
-bool simpleListIsEmpty(SimpleList l);
+bool simpleListIsEmpty(const SimpleList l);
 
 /** \brief Returns the size of the list.
  *
@@ -96,7 +87,7 @@ bool simpleListIsEmpty(SimpleList l);
  * \return Number of elements.
  *
  */
-int simpleListLength(SimpleList l);
+int simpleListLength(const SimpleList l);
 
 
 
@@ -107,7 +98,7 @@ int simpleListLength(SimpleList l);
  * \return true if found, false otherwise.
  *
  */
-bool simpleListContains(SimpleList l, Ptr data);
+bool simpleListContains(const SimpleList l, const Ptr data);
 
 
 
@@ -117,7 +108,7 @@ bool simpleListContains(SimpleList l, Ptr data);
  * \return First element of the list.
  *
  */
-Ptr simpleListGetFirst_base(SimpleList l);
+const Ptr simpleListGetFirst_base(const SimpleList l);
 #define simpleListGetFirst(l, type) (*(type*)simpleListGetFirst_base(l))
 
 
@@ -129,7 +120,7 @@ Ptr simpleListGetFirst_base(SimpleList l);
  * \return nothing.
  *
  */
-void simpleListSetFirst_base(SimpleList l, Ptr data);
+void simpleListSetFirst_base(SimpleList l, const Ptr data);
 /** Automatic macro to send the address of data to simpleListSetFirst_base */
 #define simpleListSetFirst(l, data) simpleListSetFirst_base(l, &(data))
 
@@ -142,7 +133,7 @@ void simpleListSetFirst_base(SimpleList l, Ptr data);
  * \return nothing.
  *
  */
-void simpleListAddFirst_base(SimpleList l, Ptr data);
+void simpleListAddFirst_base(SimpleList l, const Ptr data);
 /** Automatic macro to send the address of data to simpleListAddFirst_base */
 #define simpleListAddFirst(l, data) simpleListAddFirst_base(l, &(data))
 
@@ -175,7 +166,7 @@ void simpleListSort(SimpleList l, int method);
  * \return void
  *
  */
-void simpleListDump(SimpleList l);
+void simpleListDump(const SimpleList l);
 
 
 
@@ -195,7 +186,7 @@ typedef struct {
  * \return Iterator on this list.
  *
  */
-SimpleListIt simpleListItNew(SimpleList l);
+SimpleListIt simpleListItNew(const SimpleList l);
 
 
 
@@ -205,7 +196,7 @@ SimpleListIt simpleListItNew(SimpleList l);
  * \return true if element exists, false otherwise.
  *
  */
-bool simpleListItExists(SimpleListIt *it);
+bool simpleListItExists(const SimpleListIt *it);
 
 
 
@@ -225,7 +216,7 @@ void simpleListItNext(SimpleListIt *it);
  * \return element.
  *
  */
-Ptr simpleListItGet_base(SimpleListIt *it);
+const Ptr simpleListItGet_base(const SimpleListIt *it);
 #define simpleListItGet(it, type) (*(type*)simpleListItGet_base(it))
 
 
@@ -236,7 +227,7 @@ Ptr simpleListItGet_base(SimpleListIt *it);
  * \return nothing.
  *
  */
-void simpleListItSet_base(SimpleListIt *it, Ptr data);
+void simpleListItSet_base(SimpleListIt *it, const Ptr data);
 #define simpleListItSet(it, data) simpleListItSet_base(it, &(data))
 
 
@@ -248,7 +239,7 @@ void simpleListItSet_base(SimpleListIt *it, Ptr data);
  * \return nothing.
  *
  */
-void simpleListItAddAfter_base(SimpleListIt *it, Ptr data);
+void simpleListItAddAfter_base(SimpleListIt *it, const Ptr data);
 /** Automatic macro to send the address of data to simpleListItAddAfter_base */
 #define simpleListItAddAfter(it, data) simpleListItAddAfter_base(it, &(data))
 
