@@ -59,7 +59,7 @@ void listComparable(List l, ElCmpFct fct);
  * \return Copy of the list
  *
  */
-List listClone(List l);
+List listClone(const List l);
 
 
 
@@ -79,7 +79,7 @@ void listClear(List l);
  * \return true if empty, false if not.
  *
  */
-bool listIsEmpty(List l);
+bool listIsEmpty(const List l);
 
 /** \brief Returns the size of the list.
  *
@@ -87,7 +87,7 @@ bool listIsEmpty(List l);
  * \return Number of elements.
  *
  */
-int listLength(List l);
+int listLength(const List l);
 
 
 
@@ -98,7 +98,7 @@ int listLength(List l);
  * \return true if found, false otherwise.
  *
  */
-bool listContains(List l, Ptr data);
+bool listContains(const List l, const Ptr data);
 
 
 
@@ -108,7 +108,7 @@ bool listContains(List l, Ptr data);
  * \return First element of the list.
  *
  */
-Ptr listGetFirst_base(List l);
+const Ptr listGetFirst_base(const List l);
 #define listGetFirst(l, type) (*(type*)listGetFirst_base(l))
 
 /** \brief Returns the last element of a given list.
@@ -117,7 +117,7 @@ Ptr listGetFirst_base(List l);
  * \return Last element of the list.
  *
  */
-Ptr listGetLast_base(List l);
+const Ptr listGetLast_base(const List l);
 #define listGetLast(l, type) (*(type*)listGetLast_base(l))
 
 
@@ -129,7 +129,7 @@ Ptr listGetLast_base(List l);
  * \return nothing.
  *
  */
-void listSetFirst_base(List l, Ptr data);
+void listSetFirst_base(List l, const Ptr data);
 /** Automatic macro to send the address of data to listSetFirst_base */
 #define listSetFirst(l, data) listSetFirst_base(l, &(data))
 
@@ -140,7 +140,7 @@ void listSetFirst_base(List l, Ptr data);
  * \return nothing.
  *
  */
-void dllSetLast_base(List l, Ptr data);
+void dllSetLast_base(List l, const Ptr data);
 /** Automatic macro to send the address of data to dllSetLast_base */
 #define dllSetLast(l, data) dllSetLast_base(l, &(data))
 
@@ -153,7 +153,7 @@ void dllSetLast_base(List l, Ptr data);
  * \return nothing.
  *
  */
-void listAddFirst_base(List l, Ptr data);
+void listAddFirst_base(List l, const Ptr data);
 /** Automatic macro to send the address of data to listAddFirst_base */
 #define listAddFirst(l, data) listAddFirst_base(l, &(data))
 
@@ -164,7 +164,7 @@ void listAddFirst_base(List l, Ptr data);
  * \return nothing.
  *
  */
-void listAddLast_base(List l, Ptr data);
+void listAddLast_base(List l, const Ptr data);
 /** Automatic macro to send the address of data to listAddLast_base */
 #define listAddLast(l, data) listAddLast_base(l, &(data))
 
@@ -205,7 +205,7 @@ void listSort(List l, int method);
  * \return void
  *
  */
-void listDump(List l);
+void listDump(const List l);
 
 
 
@@ -224,7 +224,7 @@ typedef struct {
  * \return Iterator on this list.
  *
  */
-ListIt listItNew(List l);
+ListIt listItNew(const List l);
 
 /** \brief Creates an iterator on the list (Starting with the last element).
  *
@@ -232,7 +232,7 @@ ListIt listItNew(List l);
  * \return Iterator on this list.
  *
  */
-ListIt listItNewBack(List l);
+ListIt listItNewBack(const List l);
 
 
 
@@ -242,7 +242,7 @@ ListIt listItNewBack(List l);
  * \return true if element exists, false otherwise.
  *
  */
-bool listItExists(ListIt *it);
+bool listItExists(const ListIt *it);
 
 
 
@@ -270,7 +270,7 @@ void listItPrev(ListIt *it);
  * \return element.
  *
  */
-Ptr listItGet_base(ListIt *it);
+const Ptr listItGet_base(const ListIt *it);
 #define listItGet(it, type) (*(type*)listItGet_base(it))
 
 
@@ -281,7 +281,7 @@ Ptr listItGet_base(ListIt *it);
  * \return nothing.
  *
  */
-void listItSet_base(ListIt *it, Ptr data);
+void listItSet_base(ListIt *it, const Ptr data);
 #define listItSet(it, data) listItSet_base(it, &(data))
 
 
@@ -293,7 +293,7 @@ void listItSet_base(ListIt *it, Ptr data);
  * \return nothing.
  *
  */
-void listItAddAfter_base(ListIt *it, Ptr data);
+void listItAddAfter_base(ListIt *it, const Ptr data);
 /** Automatic macro to send the address of data to listItAddAfter_base */
 #define listItAddAfter(it, data) listItAddAfter_base(it, &(data))
 
@@ -304,7 +304,7 @@ void listItAddAfter_base(ListIt *it, Ptr data);
  * \return nothing.
  *
  */
-void listItAddBefore_base(ListIt *it, Ptr data);
+void listItAddBefore_base(ListIt *it, const Ptr data);
 /** Automatic macro to send the address of data to listItAddBefore_base */
 #define listItAddBefore(it, data) listItAddBefore_base(it, &(data))
 
