@@ -3,6 +3,7 @@
 #include "ExtLib/Iterable.h"
 #include "ExtLib/Array.h"
 #include "ExtLib/Heap.h"
+#include "ExtLib/Hash.h"
 
 #include <time.h>
 #include <stdio.h>
@@ -149,9 +150,49 @@ void testHeap() {
     heapDel(h);
 }
 
+int hash_string(const char * s)
+{
+    int hash = 0;
+
+    for(; *s; ++s)
+    {
+        hash += *s;
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
+
+    return hash;
+}
+
+void testHash() {
+    Hash h = hashNew(strcmp, hash_string);
+
+    char *s1 = "coucou1";
+    char *s2 = "coucou2";
+    char *s3 = "coucou3";
+
+
+    hashAdd(h, s1);
+    hashAdd(h, s2);
+
+    printf("%p\n", hashGet(h, s1));
+    printf("%p\n", hashGet(h, s2));
+    printf("%p\n", hashGet(h, s3));
+
+    hashRemove(h, s1);
+
+    printf("%p\n", hashGet(h, s1));
+
+    hashDel(h, NULL);
+}
+
 int main() {
     //testArray1();
-    testHeap();
+    testHash();
 
     return EXIT_SUCCESS;
 }

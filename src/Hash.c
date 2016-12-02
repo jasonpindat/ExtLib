@@ -1,10 +1,11 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "ExtLib/Hash.h"
 
 #define HASH_SIZE 13 // prime number
 
-struct _HashNode { 
+struct _HashNode {
     HashNode next;
     void *data;
 };
@@ -18,7 +19,7 @@ struct _Hash {
 
 
 
-Hash hash_init(int (*cmp)(void *, void *), int (*hashFct)(void *)) {
+Hash hashNew(int (*cmp)(void *, void *), int (*hashFct)(void *)) {
 
     assert(cmp != NULL);
     assert(hashFct != NULL);
@@ -35,8 +36,8 @@ Hash hash_init(int (*cmp)(void *, void *), int (*hashFct)(void *)) {
     return h;
 }
 
-bool hash_add(Hash h, void *data) {
-    
+bool hashAdd(Hash h, void *data) {
+
     int index = h->hashFct(data)%h->size;
 
     HashNode nodeSave = NULL;
@@ -63,7 +64,7 @@ bool hash_add(Hash h, void *data) {
     return true;
 }
 
-void *hash_get(Hash h, void *data) {
+void *hashGet(Hash h, void *data) {
     int cmpRes;
 
     HashNode node = h->ct[h->hashFct(data)%h->size];
@@ -77,7 +78,7 @@ void *hash_get(Hash h, void *data) {
     return NULL;
 }
 
-bool hash_remove(Hash h, void *data) {
+bool hashRemove(Hash h, void *data) {
 
     int index = h->hashFct(data)%h->size;
 
@@ -103,10 +104,10 @@ bool hash_remove(Hash h, void *data) {
     return true;
 }
 
-void hash_free(Hash h, void (*release)(void *)) {
+void hashDel(Hash h, void (*release)(void *)) {
 
     for(int i=0; i<h->size; ++i) {
-        
+
         HashNode p=h->ct[i];
 
         while(p) {
