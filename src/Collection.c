@@ -73,7 +73,9 @@ ElCmpFct collectionGetCmpFct(Collection c) {
 void collectionElementInstanciable(Collection c, ElCopyFct copyFct, ElDelFct delFct) {
     c->copyFct = copyFct;
     c->delFct = delFct;
-    collectionUpdAllocationPolicy(c);
+
+    if(c->type == ARRAY || c->type == HEAP)
+        collectionUpdAllocationPolicy(c);
 }
 
 ElCopyFct collectionGetCopyFunction(Collection c) {

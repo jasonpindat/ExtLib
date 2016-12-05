@@ -57,7 +57,7 @@ ElCmpFct collectionGetCmpFct(Collection c);
 
 
 
-/** \brief Sets the functions to copy an element and to delete an element of this collection. If NULL or collectionElementCopy is not called, the elements will be copied bit by bit. /!\ Must be set before any Collection update
+/** \brief Sets the functions to copy an element and to delete an element of this collection. If not called, the elements will be copied bit by bit. /!\ Must be set before any Collection update
  *
  * \param c : Collection in which you set the fonction.
  * \param copyFct : pointer to the copy function, the function must take 2 pointers, the first is the new allocated element to initialize and the second is the source element and return nothing.

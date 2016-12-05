@@ -51,6 +51,16 @@ void listDel(List l);
  */
 void listComparable(List l, ElCmpFct fct);
 
+/** \brief Sets the functions to copy an element and to delete an element of this collection. If not called, the elements will be copied bit by bit. /!\ Must be set before any List update
+ *
+ * \param l : List in which you set the fonction.
+ * \param copyFct : pointer to the copy function, the function must take 2 pointers, the first is the new allocated element to initialize and the second is the source element and return nothing.
+ * \param delFct : pointer to the deletion function, the function must take a pointer to the element to destroy. Note that this pointer will be automatically freed, so delFct must'nt do this.
+ * \return nothing.
+ *
+ */
+void listElementInstanciable(List l, ElCopyFct copyFct, ElDelFct delFct);
+
 
 
 /** \brief Copies a list and all its content.

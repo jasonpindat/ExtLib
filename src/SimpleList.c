@@ -22,8 +22,6 @@ struct _SimpleList {
     int elemSize;
     ElCopyFct copyFct;
     ElDelFct delFct;
-    bool needsAllocation;
-    Ptr (*ptrTransform)(Ptr);
 
     int length;
 
@@ -50,7 +48,8 @@ SimpleList simpleListNew(int elemSize) {
         l->cmpFct=NULL;
     }
 
-    collectionElementInstanciable((Collection)l, NULL, NULL);
+    l->copyFct = NULL;
+    l->delFct = NULL;
 
     l->length = 0;
 
@@ -71,14 +70,19 @@ void simpleListComparable(SimpleList l, ElCmpFct fct) {
     l->cmpFct = fct;
 }
 
+void simpleListElementInstanciable(SimpleList l, ElCopyFct copyFct, ElDelFct delFct) {
+    l->copyFct = copyFct;
+    l->delFct = delFct;
+}
+
 
 
 SimpleList simpleListClone(const SimpleList l) {
     SimpleList l2 = simpleListNew(l->elemSize);
 
     l2->cmpFct = l->cmpFct;
-
-    collectionElementInstanciable((Collection)l2, l->copyFct, l->delFct);
+    l2->copyFct = l->copyFct;
+    l2->delFct = l->delFct;
 
     SimpleListNode node = l->first;
     bool first = true;

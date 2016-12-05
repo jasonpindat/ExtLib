@@ -25,16 +25,12 @@ struct _Hash {
     int elemSize;
     ElCopyFct copyFct;
     ElDelFct delFct;
-    bool needsAllocation;
-    Ptr (*ptrTransform)(Ptr);
 
     int length;
 
     int keySize;
     ElCopyFct keyCopyFct;
     ElDelFct keyDelFct;
-    bool keyNeedsAllocation;
-    Ptr (*keyPtrTransform)(Ptr);
 
     ElHashFct hashFct;
     int size;
@@ -138,11 +134,13 @@ Hash hashNew(int keySize, int elemSize, ElHashFct hashFct) {
     else
         h->elemSize=elemSize;
 
-    collectionElementInstanciable((Collection)h, NULL, NULL);
-    int offset = (void *)&h->keySize - (void *)&h->elemSize;
-    collectionElementInstanciable((Collection)((void *)h + offset), NULL, NULL);
+    h->copyFct = NULL;
+    h->delFct = NULL;
 
     h->length = 0;
+
+    h->keyCopyFct = NULL;
+    h->keyDelFct = NULL;
 
     h->hashFct = hashFct;
     h->size = DEFSIZE;
@@ -154,32 +152,14 @@ Hash hashNew(int keySize, int elemSize, ElHashFct hashFct) {
 Hash hashNewStr(int elemSize) {
     Hash h = hashNew(sizeof(char *), elemSize, (ElHashFct)hashString);
 
-    hashComparable(h, (ElCmpFct)compareString);
-
-    int offset = (void *)&h->keySize - (void *)&h->elemSize;
-    collectionElementInstanciable((Collection)((void *)h + offset), (ElCopyFct)copyString, (ElDelFct)delString);
+    h->cmpFct = (ElCmpFct)compareString;
+    h->keyCopyFct = (ElCopyFct)copyString;
+    h->keyDelFct = (ElDelFct)delString;
 
     return h;
 }
 
 void hashDel(Hash h) {
-
-    /*for(int i=0; i<h->size; ++i) {
-
-        HashNode p=h->ct[i];
-
-        while(p) {
-            HashNode ptr = p->next;
-
-            if(release!=NULL)
-                release(p->data);
-
-            free(p);
-
-            p = ptr;
-        }
-    }*/
-
     hashClear(h);
 
     free(h->ct);
@@ -190,6 +170,16 @@ void hashDel(Hash h) {
 
 void hashComparable(Hash h, ElCmpFct fct) {
     h->cmpFct = fct;
+}
+
+void hashKeyInstanciable(Hash h, ElCopyFct keyCopyFct, ElDelFct keyDelFct) {
+    h->keyCopyFct = keyCopyFct;
+    h->keyDelFct = keyDelFct;
+}
+
+void hashElementInstanciable(Hash h, ElCopyFct copyFct, ElDelFct delFct) {
+    h->copyFct = copyFct;
+    h->delFct = delFct;
 }
 
 
@@ -203,16 +193,12 @@ Hash hashClone(const Hash h) {
     h2->elemSize = h->elemSize;
     h2->copyFct = h->copyFct;
     h2->delFct = h->delFct;
-    h2->needsAllocation = h->needsAllocation;
-    h2->ptrTransform = h->ptrTransform;
 
     h2->length = 0;
 
     h2->keySize = h->keySize;
     h2->keyCopyFct = h->keyCopyFct;
     h2->keyDelFct = h->keyDelFct;
-    h2->keyNeedsAllocation = h->keyNeedsAllocation;
-    h2->keyPtrTransform = h->keyPtrTransform;
 
     h2->hashFct = h->hashFct;
 

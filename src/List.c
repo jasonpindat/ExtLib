@@ -22,8 +22,6 @@ struct _List {
     int elemSize;
     ElCopyFct copyFct;
     ElDelFct delFct;
-    bool needsAllocation;
-    Ptr (*ptrTransform)(Ptr);
 
     int length;
 
@@ -52,7 +50,8 @@ List listNew(int elemSize) {
         l->cmpFct=NULL;
     }
 
-    collectionElementInstanciable((Collection)l, NULL, NULL);
+    l->copyFct = NULL;
+    l->delFct = NULL;
 
     l->length = 0;
 
@@ -74,14 +73,19 @@ void listComparable(List l, ElCmpFct fct) {
     l->cmpFct = fct;
 }
 
+void listElementInstanciable(List l, ElCopyFct copyFct, ElDelFct delFct) {
+    l->copyFct = copyFct;
+    l->delFct = delFct;
+}
+
 
 
 List listClone(const List l) {
     List l2 = listNew(l->elemSize);
 
     l2->cmpFct = l->cmpFct;
-
-    collectionElementInstanciable((Collection)l2, l->copyFct, l->delFct);
+    l2->copyFct = l->copyFct;
+    l2->delFct = l->delFct;
 
     ListNode node = l->first;
 

@@ -22,7 +22,6 @@ typedef List Queue;
 
 #define queueNew(elemSize)                  listNew(elemSize)
 #define queueDel(q)                         listDel(q)
-#define queueMultithread(q, multithread)    listMultithread(q, multithread)
 #define queueClone(q)                       listClone(q)
 
 #define queueClear(q)                       listClear(q)

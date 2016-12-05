@@ -91,6 +91,10 @@ void arrayComparable(Array a, ElCmpFct fct) {
     a->cmpFct = fct;
 }
 
+void arrayElementInstanciable(Array a, ElCopyFct copyFct, ElDelFct delFct) {
+    collectionElementInstanciable((Collection)a, copyFct, delFct);
+}
+
 
 
 Array arrayClone(const Array a) {

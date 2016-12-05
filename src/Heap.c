@@ -72,6 +72,10 @@ void heapComparable(Heap h, ElCmpFct fct) {
     h->cmpFct = fct;
 }
 
+void heapElementInstanciable(Heap h, ElCopyFct copyFct, ElDelFct delFct) {
+    collectionElementInstanciable((Collection)h, copyFct, delFct);
+}
+
 
 
 Heap heapClone(const Heap h) {
