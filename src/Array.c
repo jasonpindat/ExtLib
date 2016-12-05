@@ -20,8 +20,9 @@
 
 struct _Array {
     RealType type;
-    int elemSize;
     ElCmpFct cmpFct;
+
+    int elemSize;
     ElCopyFct copyFct;
     ElDelFct delFct;
     bool needsAllocation;
@@ -100,8 +101,9 @@ Array arraySubArray(const Array a, int from, int to) {
     Array a2 = malloc(sizeof(struct _Array));
 
     a2->type = ARRAY;
-    a2->elemSize = a->elemSize;
     a2->cmpFct = a->cmpFct;
+
+    a2->elemSize = a->elemSize;
     a2->copyFct = a->copyFct;
     a2->delFct = a->delFct;
     a2->needsAllocation = a->needsAllocation;
@@ -322,6 +324,7 @@ ArrayIt arrayItNew(const Array a) {
 
     it.array = a;
     it.index = 0;
+    it.onNext = false;
 
     return it;
 }
@@ -331,6 +334,7 @@ ArrayIt arrayItNewBack(const Array a) {
 
     it.array = a;
     it.index = a->length-1;
+    it.onNext = false;
 
     return it;
 }
@@ -344,7 +348,10 @@ bool arrayItExists(const ArrayIt *it) {
 
 
 void arrayItNext(ArrayIt *it) {
-    it->index++;
+    if(it->onNext)
+        it->onNext = false;
+    else
+        it->index++;
 }
 
 void arrayItPrev(ArrayIt *it) {
@@ -378,7 +385,7 @@ void arrayItAddBefore_base(ArrayIt *it, const Ptr data) {
 
 void arrayItRemove(ArrayIt *it) {
     arrayRemove(it->array, it->index);
-    it->index--;
+    it->onNext = true;
 }
 
 

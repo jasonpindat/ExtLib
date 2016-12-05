@@ -150,44 +150,26 @@ void testHeap() {
     heapDel(h);
 }
 
-int hash_string(const char * s)
-{
-    int hash = 0;
-
-    for(; *s; ++s)
-    {
-        hash += *s;
-        hash += (hash << 10);
-        hash ^= (hash >> 6);
-    }
-
-    hash += (hash << 3);
-    hash ^= (hash >> 11);
-    hash += (hash << 15);
-
-    return hash;
-}
-
 void testHash() {
-    Hash h = hashNew(strcmp, hash_string);
+    Hash h = hashNewStr(sizeof(char *));
 
     char *s1 = "coucou1";
     char *s2 = "coucou2";
     char *s3 = "coucou3";
 
 
-    hashAdd(h, s1);
-    hashAdd(h, s2);
+    hashSet(h, s1, s1);
+    hashSet(h, s2, s2);
 
-    printf("%p\n", hashGet(h, s1));
-    printf("%p\n", hashGet(h, s2));
-    printf("%p\n", hashGet(h, s3));
+    printf("%p\n", hashGet(h, s1, char *));
+    printf("%p\n", hashGet(h, s2, char *));
+    printf("%p\n", hashGet(h, s3, char *));
 
-    hashRemove(h, s1);
+    hashUnset(h, s1);
 
-    printf("%p\n", hashGet(h, s1));
+    printf("%p\n", hashGet(h, s1, char *));
 
-    hashDel(h, NULL);
+    hashDel(h);
 }
 
 int main() {

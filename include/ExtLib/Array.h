@@ -108,7 +108,7 @@ void arrayTrimCapacity(Array a);
 
 
 
-/** \brief Tells whether the array contains an element or not, arrayComparable must have been called or the vector must have been created with a EL_* constant.
+/** \brief Tells whether the array contains an element or not, arrayComparable must have been called or the array must have been created with a EL_* constant.
  *
  * \param a : Array to look into.
  * \param data : Element to seek.
@@ -239,6 +239,7 @@ void arrayDump(const Array a);
 typedef struct {
     Array array;
     int index;
+    bool onNext;
 } ArrayIt;
 
 

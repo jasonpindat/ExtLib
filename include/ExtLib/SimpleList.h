@@ -176,6 +176,7 @@ typedef struct {
     SimpleList list;
     SimpleListNode prevNode;
     SimpleListNode node;
+    bool onNext;
 } SimpleListIt;
 
 

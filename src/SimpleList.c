@@ -17,8 +17,9 @@
 
 struct _SimpleList {
     RealType type;
-    int elemSize;
     ElCmpFct cmpFct;
+
+    int elemSize;
     ElCopyFct copyFct;
     ElDelFct delFct;
     bool needsAllocation;
@@ -259,6 +260,7 @@ SimpleListIt simpleListItNew(const SimpleList l) {
     it.list = l;
     it.prevNode = NULL;
     it.node = l->first;
+    it.onNext = false;
 
     return it;
 }
@@ -272,8 +274,12 @@ bool simpleListItExists(const SimpleListIt *it) {
 
 
 void simpleListItNext(SimpleListIt *it) {
-    it->prevNode = it->node;
-    it->node = it->node->next;
+    if(it->onNext)
+        it->onNext = false;
+    else {
+        it->prevNode = it->node;
+        it->node = it->node->next;
+    }
 }
 
 
@@ -326,6 +332,8 @@ void simpleListItRemove(SimpleListIt *it) {
         it->list->delFct(node+sizeof(struct _SimpleListNode));
 
     free(node);
+
+    it->onNext = true;
 }
 
 

@@ -19,8 +19,9 @@
 
 struct _Heap {
     RealType type;
-    int elemSize;
     ElCmpFct cmpFct;
+
+    int elemSize;
     ElCopyFct copyFct;
     ElDelFct delFct;
     bool needsAllocation;

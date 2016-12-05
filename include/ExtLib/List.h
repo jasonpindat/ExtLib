@@ -214,6 +214,7 @@ void listDump(const List l);
 typedef struct {
     List list;
     ListNode node;
+    bool onNext;
 } ListIt;
 
 

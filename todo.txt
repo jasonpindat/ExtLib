@@ -20,3 +20,5 @@ Test List, SimpleList, String, Heap a faire
 String : indexOf à tester
 
 Rendre heap possible en min et max
+Faire stringCompare / stringEquals
+Hash fini mais ne marche pas

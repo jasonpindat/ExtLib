@@ -17,8 +17,9 @@
 
 struct _List {
     RealType type;
-    int elemSize;
     ElCmpFct cmpFct;
+
+    int elemSize;
     ElCopyFct copyFct;
     ElDelFct delFct;
     bool needsAllocation;
@@ -314,6 +315,7 @@ ListIt listItNew(const List l) {
 
     it.list = l;
     it.node = l->first;
+    it.onNext = false;
 
     return it;
 }
@@ -323,6 +325,7 @@ ListIt listItNewBack(const List l) {
 
     it.list = l;
     it.node = l->last;
+    it.onNext = false;
 
     return it;
 }
@@ -336,7 +339,10 @@ bool listItExists(const ListIt *it) {
 
 
 void listItNext(ListIt *it) {
-    it->node = it->node->next;
+    if(it->onNext)
+        it->onNext = false;
+    else
+        it->node = it->node->next;
 }
 
 void listItPrev(ListIt *it) {
@@ -424,6 +430,8 @@ void listItRemove(ListIt *it) {
         it->list->delFct(node+sizeof(struct _ListNode));
 
     free(node);
+
+    it->onNext = true;
 }
 
 

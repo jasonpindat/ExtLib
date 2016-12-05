@@ -18,7 +18,8 @@ typedef enum {
     SIMPLELIST,
     LIST,
     STRING,
-    HEAP
+    HEAP,
+    HASH
 } RealType;
 
 /** Ascendant sorting */
@@ -71,6 +72,9 @@ typedef void(*ElDelFct)(Ptr obj);
 
 /** ElActFct : An action function. must take 2 generic pointers (Ptr) 1st to an object, 2nd to additional informations sent by the caller and return nothing */
 typedef void(*ElActFct)(Ptr obj, Ptr infos);
+
+/** ElHashFct : A hash function. must take a generic pointer (Ptr) to a key object and return an int */
+typedef unsigned long(*ElHashFct)(Ptr key);
 
 
 /* \brief Throws an error.
