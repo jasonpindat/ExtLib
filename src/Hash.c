@@ -15,7 +15,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 
 #define DEFSIZE 13 // prime number
 
@@ -53,9 +52,7 @@ static bool isPrime(int number) { // number must be >= 4
     if (number%2==0 || number%3==0)
         return false;     // check if number is divisible by 2 or 3
     else {
-        int bounder = sqrt(number);
-
-        for (int i=5; i<=bounder; i+=6)
+        for (int i=5; i*i<=number; i+=6)
             if (number % i == 0 || number%(i + 2) == 0)
                 return false;
 
