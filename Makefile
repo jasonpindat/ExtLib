@@ -43,7 +43,7 @@ obj/%.o:src/%.c
 
 # Library
 
-dist/lib/libextlib.a: obj/Array.o obj/Collection.o obj/Common.o obj/Heap.o obj/Iterable.o obj/List.o obj/SimpleList.o obj/String.o
+dist/lib/libextlib.a: obj/Array.o obj/Collection.o obj/Common.o obj/Hash.o obj/Heap.o obj/Iterable.o obj/List.o obj/SimpleList.o obj/String.o
 	ar -rv $@ $^
 
 distlib: dist
