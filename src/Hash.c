@@ -94,11 +94,12 @@ static void hashResize(const Hash h, int minSize) {
 static unsigned long hashString(unsigned char **strp)
 {
     unsigned long hash = 5381;
-    int c;
     unsigned char *str = *strp;
 
-    while((c = *str++))
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    while(*str) {
+        hash = ((hash << 5) + hash) + *str; /* hash * 33 + c */
+        str++;
+    }
 
     return hash;
 }
@@ -141,8 +142,8 @@ Hash hashNew(int keySize, int elemSize, ElHashFct hashFct) {
         h->elemSize=elemSize;
 
     collectionElementInstanciable((Collection)h, NULL, NULL);
-    int offset = &h->keySize - &h->elemSize;
-    collectionElementInstanciable((Collection)(h + offset), NULL, NULL);
+    int offset = (void *)&h->keySize - (void *)&h->elemSize;
+    collectionElementInstanciable((Collection)((void *)h + offset), NULL, NULL);
 
     h->length = 0;
 
@@ -158,8 +159,8 @@ Hash hashNewStr(int elemSize) {
 
     hashComparable(h, (ElCmpFct)compareString);
 
-    int offset = &h->keySize - &h->elemSize;
-    collectionElementInstanciable((Collection)(h + offset), (ElCopyFct)copyString, (ElDelFct)delString);
+    int offset = (void *)&h->keySize - (void *)&h->elemSize;
+    collectionElementInstanciable((Collection)((void *)h + offset), (ElCopyFct)copyString, (ElDelFct)delString);
 
     return h;
 }
@@ -271,7 +272,7 @@ const Ptr hashGet_base(const Hash h, const Ptr key) {
 
     HashNode node = h->ct[h->hashFct(key)%h->size];
 
-    while((node != NULL) && ((cmpRes=h->cmpFct(key, node+sizeof(struct _HashNode))) > 0))
+    while((node != NULL) && ((cmpRes=h->cmpFct(key, (void *)node+sizeof(struct _HashNode))) > 0))
         node = node->next;
 
     if(node != NULL && cmpRes == 0)
@@ -289,7 +290,7 @@ void hashSet_base(Hash h, const Ptr key, const Ptr data) {
     HashNode node = h->ct[index];
     int cmpRes;
 
-    while((node != NULL) && ((cmpRes=h->cmpFct(key, node+sizeof(struct _HashNode))) > 0)) {
+    while((node != NULL) && ((cmpRes=h->cmpFct(key, (void *)node+sizeof(struct _HashNode))) > 0)) {
         nodeSave = node;
         node = node->next;
     }
@@ -303,7 +304,7 @@ void hashSet_base(Hash h, const Ptr key, const Ptr data) {
         }
 
         HashNode newnode = malloc(sizeof(struct _HashNode) + h->keySize + h->elemSize);
-        newnode->data = node + sizeof(struct _HashNode) + h->keySize;
+        newnode->data = (void *)newnode + sizeof(struct _HashNode) + h->keySize;
         newnode->next = node;
 
         if(nodeSave == NULL)
@@ -314,9 +315,9 @@ void hashSet_base(Hash h, const Ptr key, const Ptr data) {
         node = newnode;
 
         if(h->keyCopyFct)
-            h->keyCopyFct(node+sizeof(struct _HashNode), key);
+            h->keyCopyFct((void *)node+sizeof(struct _HashNode), key);
         else
-            memcpy(node+sizeof(struct _HashNode), key, h->keySize);
+            memcpy((void *)node+sizeof(struct _HashNode), key, h->keySize);
     }
     else if(h->delFct)
         h->delFct(node->data);
@@ -337,7 +338,7 @@ bool hashUnset_base(Hash h, const Ptr key) {
     HashNode node = h->ct[index];
     int cmpRes;
 
-    while((node != NULL) && ((cmpRes=h->cmpFct(key, node+sizeof(struct _HashNode))) > 0)) {
+    while((node != NULL) && ((cmpRes=h->cmpFct(key, (void *)node+sizeof(struct _HashNode))) > 0)) {
         nodeSave = node;
         node = node->next;
     }
@@ -351,7 +352,7 @@ bool hashUnset_base(Hash h, const Ptr key) {
         nodeSave->next = node->next;
 
     if(h->keyDelFct)
-        h->keyDelFct(node+sizeof(struct _HashNode));
+        h->keyDelFct((void *)node+sizeof(struct _HashNode));
 
     if(h->delFct)
         h->delFct(node->data);
@@ -417,7 +418,7 @@ void hashItNext(HashIt *it) {
 
 
 const Ptr hashItGetKey_base(const HashIt *it) {
-    return it->node + sizeof(struct _HashNode);
+    return (void *)it->node + sizeof(struct _HashNode);
 }
 
 const Ptr hashItGet_base(const HashIt *it) {
@@ -446,10 +447,21 @@ void hashItRemove(HashIt *it) {
     else
         it->lastNode->next = node->next;
 
-    hashItNext(it);
+    if(node->next)
+        it->node = node->next;
+    else {
+        do {
+            it->index++;
+        } while(it->index < it->hash->size && !it->hash->ct[it->index]);
+
+        if(it->index >= it->hash->size)
+            it->node = NULL;
+        else
+            it->node = it->hash->ct[it->index];
+    }
 
     if(it->hash->keyDelFct)
-        it->hash->keyDelFct(node+sizeof(struct _HashNode));
+        it->hash->keyDelFct((void *)node+sizeof(struct _HashNode));
 
     if(it->hash->delFct)
         it->hash->delFct(node->data);

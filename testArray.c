@@ -163,18 +163,36 @@ void testHash() {
 
     printf("%p\n", hashGet(h, s1, char *));
     printf("%p\n", hashGet(h, s2, char *));
-    printf("%p\n", hashGet(h, s3, char *));
+    printf("%s\n", hashContains(h, s3)?"true":"false");
 
     hashUnset(h, s1);
 
-    printf("%p\n", hashGet(h, s1, char *));
+    printf("%s\n", hashContains(h, s1)?"true":"false");
+
+    hashDel(h);
+}
+
+void testHash2() {
+    Hash h = hashNewStr(sizeof(int));
+
+    char *tmp = malloc(50);
+
+    for(int i=0; i<100; i++) {
+        sprintf(tmp, "coucou%d", i);
+        hashSet(h, tmp, i);
+    }
+
+    free(tmp);
+
+    for(HashIt it = hashItNew(h); hashItExists(&it); hashItNext(&it))
+        printf("%s : %d\n", hashItGetKey(&it, char *), hashItGet(&it, int));
 
     hashDel(h);
 }
 
 int main() {
     //testArray1();
-    testHash();
+    testHash2();
 
     return EXIT_SUCCESS;
 }

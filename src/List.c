@@ -86,7 +86,7 @@ List listClone(const List l) {
     ListNode node = l->first;
 
     while(node) {
-        listAddLast_base(l2, node+sizeof(struct _ListNode));
+        listAddLast_base(l2, (void *)node+sizeof(struct _ListNode));
         node = node->next;
     }
 
@@ -102,7 +102,7 @@ void listClear(List l) {
     while(node) {
 
         if(l->delFct)
-            l->delFct(node+sizeof(struct _ListNode));
+            l->delFct((void *)node+sizeof(struct _ListNode));
 
         nodeSave = node;
         node = node->next;
@@ -130,7 +130,7 @@ bool listContains(const List l, const Ptr data) {
     ListNode node = l->first;
 
     while(node) {
-        if(l->cmpFct(node+sizeof(struct _ListNode), data) == 0)
+        if(l->cmpFct((void *)node+sizeof(struct _ListNode), data) == 0)
             return true;
 
         node = node->next;
@@ -142,33 +142,33 @@ bool listContains(const List l, const Ptr data) {
 
 
 const Ptr listGetFirst_base(const List l) {
-    return l->first+sizeof(struct _ListNode);
+    return (void *)l->first+sizeof(struct _ListNode);
 }
 
 const Ptr listGetLast_base(const List l) {
-    return l->last+sizeof(struct _ListNode);
+    return (void *)l->last+sizeof(struct _ListNode);
 }
 
 
 
 void listSetFirst_base(List l, const Ptr data) {
     if(l->delFct)
-        l->delFct(l->first+sizeof(struct _ListNode));
+        l->delFct((void *)l->first+sizeof(struct _ListNode));
 
     if(l->copyFct)
-        l->copyFct(l->first+sizeof(struct _ListNode), data);
+        l->copyFct((void *)l->first+sizeof(struct _ListNode), data);
     else
-        memcpy(l->first+sizeof(struct _ListNode), data, l->elemSize);
+        memcpy((void *)l->first+sizeof(struct _ListNode), data, l->elemSize);
 }
 
 void listSetLast_base(List l, const Ptr data) {
     if(l->delFct)
-        l->delFct(l->last+sizeof(struct _ListNode));
+        l->delFct((void *)l->last+sizeof(struct _ListNode));
 
     if(l->copyFct)
-        l->copyFct(l->last+sizeof(struct _ListNode), data);
+        l->copyFct((void *)l->last+sizeof(struct _ListNode), data);
     else
-        memcpy(l->last+sizeof(struct _ListNode), data, l->elemSize);
+        memcpy((void *)l->last+sizeof(struct _ListNode), data, l->elemSize);
 }
 
 
@@ -186,9 +186,9 @@ void listAddFirst_base(List l, const Ptr data) {
         l->last = node;
 
     if(l->copyFct)
-        l->copyFct(node+sizeof(struct _ListNode), data);
+        l->copyFct((void *)node+sizeof(struct _ListNode), data);
     else
-        memcpy(node+sizeof(struct _ListNode), data, l->elemSize);
+        memcpy((void *)node+sizeof(struct _ListNode), data, l->elemSize);
 
     l->length++;
 }
@@ -206,9 +206,9 @@ void listAddLast_base(List l, const Ptr data) {
         l->first = node;
 
     if(l->copyFct)
-        l->copyFct(node+sizeof(struct _ListNode), data);
+        l->copyFct((void *)node+sizeof(struct _ListNode), data);
     else
-        memcpy(node+sizeof(struct _ListNode), data, l->elemSize);
+        memcpy((void *)node+sizeof(struct _ListNode), data, l->elemSize);
 
     l->length++;
 }
@@ -226,7 +226,7 @@ void listRemoveFirst(List l) {
         l->last = NULL;
 
     if(l->delFct)
-        l->delFct(node+sizeof(struct _ListNode));
+        l->delFct((void *)node+sizeof(struct _ListNode));
 
     free(node);
 
@@ -244,7 +244,7 @@ void listRemoveLast(List l) {
         l->first = NULL;
 
     if(l->delFct)
-        l->delFct(node+sizeof(struct _ListNode));
+        l->delFct((void *)node+sizeof(struct _ListNode));
 
     free(node);
 
@@ -273,7 +273,7 @@ void listSort(List l, int method) {
                     // Left empty, take right OR Right empty, take left, OR compare.
                     if (!leftSize)                  {next=right;right=right->next;rightSize--;}
                     else if (!rightSize || !right)  {next=left;left=left->next;leftSize--;}
-                    else if (method*fct(left+sizeof(struct _ListNode),right+sizeof(struct _ListNode))<0)     {next=left;left=left->next;leftSize--;}
+                    else if (method*fct((void *)left+sizeof(struct _ListNode),(void *)right+sizeof(struct _ListNode))<0)     {next=left;left=left->next;leftSize--;}
                     else                            {next=right;right=right->next;rightSize--;}
                     // Update pointers to keep track of where we are:
                     if (tail) tail->next=next;  else first=next;
@@ -352,19 +352,19 @@ void listItPrev(ListIt *it) {
 
 
 const Ptr listItGet_base(const ListIt *it) {
-    return it->node+sizeof(struct _ListNode);
+    return (void *)it->node+sizeof(struct _ListNode);
 }
 
 
 
 void listItSet_base(ListIt *it, const Ptr data) {
     if(it->list->delFct)
-        it->list->delFct(it->node+sizeof(struct _ListNode));
+        it->list->delFct((void *)it->node+sizeof(struct _ListNode));
 
     if(it->list->copyFct)
-        it->list->copyFct(it->node+sizeof(struct _ListNode), data);
+        it->list->copyFct((void *)it->node+sizeof(struct _ListNode), data);
     else
-        memcpy(it->node+sizeof(struct _ListNode), data, it->list->elemSize);
+        memcpy((void *)it->node+sizeof(struct _ListNode), data, it->list->elemSize);
 }
 
 
@@ -382,9 +382,9 @@ void listItAddAfter_base(ListIt *it, const Ptr data) {
         it->list->last = newnode;
 
     if(it->list->copyFct)
-        it->list->copyFct(newnode+sizeof(struct _ListNode), data);
+        it->list->copyFct((void *)newnode+sizeof(struct _ListNode), data);
     else
-        memcpy(newnode+sizeof(struct _ListNode), data, it->list->elemSize);
+        memcpy((void *)newnode+sizeof(struct _ListNode), data, it->list->elemSize);
 
     it->list->length++;
 }
@@ -402,9 +402,9 @@ void listItAddBefore_base(ListIt *it, const Ptr data) {
         it->list->first = newnode;
 
     if(it->list->copyFct)
-        it->list->copyFct(newnode+sizeof(struct _ListNode), data);
+        it->list->copyFct((void *)newnode+sizeof(struct _ListNode), data);
     else
-        memcpy(newnode+sizeof(struct _ListNode), data, it->list->elemSize);
+        memcpy((void *)newnode+sizeof(struct _ListNode), data, it->list->elemSize);
 
     it->list->length++;
 }
@@ -427,7 +427,7 @@ void listItRemove(ListIt *it) {
     it->node = node->next;
 
     if(it->list->delFct)
-        it->list->delFct(node+sizeof(struct _ListNode));
+        it->list->delFct((void *)node+sizeof(struct _ListNode));
 
     free(node);
 
@@ -440,7 +440,7 @@ void listForEach(List l, ElActFct actFct, Ptr infos) {
     ListNode node = l->first;
 
     while(node) {
-        actFct(node+sizeof(struct _ListNode), infos);
+        actFct((void *)node+sizeof(struct _ListNode), infos);
         node = node->next;
     }
 }

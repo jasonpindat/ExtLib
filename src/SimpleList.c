@@ -86,12 +86,12 @@ SimpleList simpleListClone(const SimpleList l) {
 
     while(node) {
         if(first) {
-            simpleListAddFirst_base(l2, node+sizeof(struct _SimpleListNode));
+            simpleListAddFirst_base(l2, (void *)node+sizeof(struct _SimpleListNode));
             it = simpleListItNew(l2);
             first = false;
         }
         else {
-            simpleListItAddAfter_base(&it, node+sizeof(struct _SimpleListNode));
+            simpleListItAddAfter_base(&it, (void *)node+sizeof(struct _SimpleListNode));
             simpleListItNext(&it);
         }
 
@@ -110,7 +110,7 @@ void simpleListClear(SimpleList l) {
     while(node) {
 
         if(l->delFct)
-            l->delFct(node+sizeof(struct _SimpleListNode));
+            l->delFct((void *)node+sizeof(struct _SimpleListNode));
 
         nodeSave = node;
         node = node->next;
@@ -137,7 +137,7 @@ bool simpleListContains(const SimpleList l, const Ptr data) {
     SimpleListNode node = l->first;
 
     while(node) {
-        if(l->cmpFct(node+sizeof(struct _SimpleListNode), data) == 0)
+        if(l->cmpFct((void *)node+sizeof(struct _SimpleListNode), data) == 0)
             return true;
 
         node = node->next;
@@ -149,19 +149,19 @@ bool simpleListContains(const SimpleList l, const Ptr data) {
 
 
 const Ptr simpleListGetFirst_base(const SimpleList l) {
-    return l->first+sizeof(struct _SimpleListNode);
+    return (void *)l->first+sizeof(struct _SimpleListNode);
 }
 
 
 
 void simpleListSetFirst_base(SimpleList l, const Ptr data) {
     if(l->delFct)
-        l->delFct(l->first+sizeof(struct _SimpleListNode));
+        l->delFct((void *)l->first+sizeof(struct _SimpleListNode));
 
     if(l->copyFct)
-        l->copyFct(l->first+sizeof(struct _SimpleListNode), data);
+        l->copyFct((void *)l->first+sizeof(struct _SimpleListNode), data);
     else
-        memcpy(l->first+sizeof(struct _SimpleListNode), data, l->elemSize);
+        memcpy((void *)l->first+sizeof(struct _SimpleListNode), data, l->elemSize);
 }
 
 
@@ -173,9 +173,9 @@ void simpleListAddFirst_base(SimpleList l, const Ptr data) {
     l->first = node;
 
     if(l->copyFct)
-        l->copyFct(node+sizeof(struct _SimpleListNode), data);
+        l->copyFct((void *)node+sizeof(struct _SimpleListNode), data);
     else
-        memcpy(node+sizeof(struct _SimpleListNode), data, l->elemSize);
+        memcpy((void *)node+sizeof(struct _SimpleListNode), data, l->elemSize);
 
     l->length++;
 }
@@ -188,7 +188,7 @@ void simpleListRemoveFirst(SimpleList l) {
     l->first = node->next;
 
     if(l->delFct)
-        l->delFct(node+sizeof(struct _SimpleListNode));
+        l->delFct((void *)node+sizeof(struct _SimpleListNode));
 
     free(node);
 
@@ -217,7 +217,7 @@ void simpleListSort(SimpleList l, int method) {
                     // Left empty, take right OR Right empty, take left, OR compare.
                     if (!leftSize)                  {next=right;right=right->next;rightSize--;}
                     else if (!rightSize || !right)  {next=left;left=left->next;leftSize--;}
-                    else if (method*fct(left+sizeof(struct _SimpleListNode),right+sizeof(struct _SimpleListNode))<0)     {next=left;left=left->next;leftSize--;}
+                    else if (method*fct((void *)left+sizeof(struct _SimpleListNode),(void *)right+sizeof(struct _SimpleListNode))<0)     {next=left;left=left->next;leftSize--;}
                     else                            {next=right;right=right->next;rightSize--;}
                     // Update pointers to keep track of where we are:
                     if (tail) tail->next=next;  else first=next;
@@ -285,19 +285,19 @@ void simpleListItNext(SimpleListIt *it) {
 
 
 const Ptr simpleListItGet_base(const SimpleListIt *it) {
-    return it->node+sizeof(struct _SimpleListNode);
+    return (void *)it->node+sizeof(struct _SimpleListNode);
 }
 
 
 
 void simpleListItSet_base(SimpleListIt *it, const Ptr data) {
     if(it->list->delFct)
-        it->list->delFct(it->node+sizeof(struct _SimpleListNode));
+        it->list->delFct((void *)it->node+sizeof(struct _SimpleListNode));
 
     if(it->list->copyFct)
-        it->list->copyFct(it->node+sizeof(struct _SimpleListNode), data);
+        it->list->copyFct((void *)it->node+sizeof(struct _SimpleListNode), data);
     else
-        memcpy(it->node+sizeof(struct _SimpleListNode), data, it->list->elemSize);
+        memcpy((void *)it->node+sizeof(struct _SimpleListNode), data, it->list->elemSize);
 }
 
 
@@ -309,9 +309,9 @@ void simpleListItAddAfter_base(SimpleListIt *it, const Ptr data) {
     it->node->next = newnode;
 
     if(it->list->copyFct)
-        it->list->copyFct(newnode+sizeof(struct _SimpleListNode), data);
+        it->list->copyFct((void *)newnode+sizeof(struct _SimpleListNode), data);
     else
-        memcpy(newnode+sizeof(struct _SimpleListNode), data, it->list->elemSize);
+        memcpy((void *)newnode+sizeof(struct _SimpleListNode), data, it->list->elemSize);
 
     it->list->length++;
 }
@@ -329,7 +329,7 @@ void simpleListItRemove(SimpleListIt *it) {
     it->node = node->next;
 
     if(it->list->delFct)
-        it->list->delFct(node+sizeof(struct _SimpleListNode));
+        it->list->delFct((void *)node+sizeof(struct _SimpleListNode));
 
     free(node);
 
@@ -342,7 +342,7 @@ void simpleListForEach(SimpleList l, ElActFct actFct, Ptr infos) {
     SimpleListNode node = l->first;
 
     while(node) {
-        actFct(node+sizeof(struct _SimpleListNode), infos);
+        actFct((void *)node+sizeof(struct _SimpleListNode), infos);
         node = node->next;
     }
 }
