@@ -22,13 +22,13 @@ typedef Array Stack;
 
 #define stackNew(elemSize)                  arrayNew(elemSize)
 #define stackDel(s)                         arrayDel(s)
-#define stackMultithread(s, multithread)    arrayMultithread(s, multithread)
 #define stackClone(s)                       arrayClone(s)
 
 #define stackClear(s)                       arrayClear(s)
 #define stackIsEmpty(s)                     arrayIsEmpty(s)
 
 #define stackTop(s, type)                   arrayGet(s, arrayLength(s)-1, type)
+#define stackSet(s, data)					arraySet(s, arrayLength(s)-1, data)
 #define stackPush(s, data)                  arrayPush(s, data)
 #define stackPop(s)                         arrayPop(s)
 

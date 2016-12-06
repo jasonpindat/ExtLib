@@ -162,6 +162,15 @@ void stringAppendString(String str, const String str2);
  */
 void stringAppendChar(String str, const char c);
 
+/** \brief Appends an int to a string.
+ *
+ * \param str : a string.
+ * \param i : an int.
+ * \return nothing.
+ *
+ */
+void stringAppendInt(String str, const int i);
+
 
 
 /** \brief Details the heap usage of a given string

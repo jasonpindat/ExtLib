@@ -174,6 +174,19 @@ void stringAppendChar(String str, const char c) {
     str->ct[str->length++] = c;
 }
 
+void stringAppendInt(String str, const int i) {
+    char buff[15];
+
+    sprintf(buff, "%d", i);
+    int len = strlen(buff);
+
+    if(str->capacity < str->length+len)
+        stringResize(str, str->length+len);
+
+    memcpy(str->ct+str->length*sizeof(char), buff, len);
+    str->length += len;
+}
+
 
 
 void stringDump(String str) {
