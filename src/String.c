@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define DEFSIZE 8
 
@@ -185,6 +186,18 @@ void stringAppendInt(String str, const int i) {
 
     memcpy(str->ct+str->length*sizeof(char), buff, len);
     str->length += len;
+}
+
+void stringAppendF(String str, const char *format, ...) {
+    va_list args;
+    char buff[4096];
+    va_start(args, format);
+
+    vsprintf(buff, format, args);
+
+    va_end(args);
+
+    stringAppend(str, buff);
 }
 
 

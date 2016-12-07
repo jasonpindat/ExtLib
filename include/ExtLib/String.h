@@ -171,6 +171,16 @@ void stringAppendChar(String str, const char c);
  */
 void stringAppendInt(String str, const int i);
 
+/** \brief Appends a formatted string to a string.
+ *
+ * \param str : a string.
+ * \param format : an int.
+ * \param ... : format args
+ * \return nothing.
+ *
+ */
+void stringAppendF(String str, const char *format, ...);
+
 
 
 /** \brief Details the heap usage of a given string
