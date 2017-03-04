@@ -1,6 +1,4 @@
-- Priority queue min-max
-- tas min-max
-- arbre binaire
+- arbres
 -   AVL
 -   arbre 2-3-4
 -   arbre rouge noir
@@ -10,7 +8,6 @@
 graphe
 tas binomial
 tas fibo
-hash table
 Skip list
 
 
