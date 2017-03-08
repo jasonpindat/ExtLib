@@ -29,6 +29,7 @@ typedef List Queue;
 
 #define queueGet(q, type)                   listGetFirst(q, type)
 #define queueAdd(q, data)                   listAddLast(q, data)
+#define queueAddI(q, data, type)            listAddLastI(q, data, type)
 #define queueRemove(q)                      listRemoveFirst(q)
 
 #define queueDump(q)                        listDump(q)

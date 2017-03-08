@@ -143,8 +143,16 @@ int arrayIndexOf(const Array a, const Ptr data);
  * \return last index if found, -1 otherwise.
  *
  */
-
 int arrayLastIndexOf(const Array a, const Ptr data);
+
+/** \brief Returns the index of an element in the array, array must be sorted in ascending order, arrayComparable must have been called or the vector must have been created with a EL_* constant.
+ *
+ * \param a : Array to look into.
+ * \param data : Element to seek.
+ * \return index if found, -1 otherwise.
+ *
+ */
+int arrayBSearch(const Array a, const Ptr data);
 
 
 
@@ -170,6 +178,7 @@ const Ptr arrayGet_base(const Array a, int pos);
  */
 void arraySet_base(Array a, int pos, const Ptr data);
 #define arraySet(a, pos, data) arraySet_base(a, pos, &(data))
+#define arraySetI(a, pos, data, type) {type tmp = (data); arraySet_base(a, pos, &(tmp));}
 
 
 
@@ -182,6 +191,7 @@ void arraySet_base(Array a, int pos, const Ptr data);
  */
 void arrayPush_base(Array a, const Ptr data);
 #define arrayPush(a, data) arrayPush_base(a, &(data))
+#define arrayPushI(a, data, type) {type tmp = (data); arrayPush_base(a, &(tmp));}
 
 /** \brief Adds an element at a given position in an array (Not primitive).
  *
@@ -193,6 +203,7 @@ void arrayPush_base(Array a, const Ptr data);
  */
 void arrayAdd_base(Array a, int pos, const Ptr data);
 #define arrayAdd(a, pos, data) arrayAdd_base(a, pos, &(data))
+#define arrayAddI(a, pos, data, type) {type tmp = (data); arrayAdd_base(a, pos, &(tmp));}
 
 
 
@@ -319,6 +330,7 @@ const Ptr arrayItGet_base(const ArrayIt *it);
  */
 void arrayItSet_base(ArrayIt *it, const Ptr data);
 #define arrayItSet(it, data) arrayItSet_base(it, &(data))
+#define arrayItSetI(it, data, type) {type tmp = (data); arrayItSet_base(it, &(tmp));}
 
 
 
@@ -332,6 +344,7 @@ void arrayItSet_base(ArrayIt *it, const Ptr data);
 void arrayItAddAfter_base(ArrayIt *it, const Ptr data);
 /** Automatic macro to send the address of data to arrayItAddAfter_base */
 #define arrayItAddAfter(it, data) arrayItAddAfter_base(it, &(data))
+#define arrayItAddAfterI(it, data, type) {type tmp = (data); arrayItAddAfter_base(it, &(tmp));}
 
 /** \brief Adds a new element before the position pointed by the iterator.
  *
@@ -343,6 +356,7 @@ void arrayItAddAfter_base(ArrayIt *it, const Ptr data);
 void arrayItAddBefore_base(ArrayIt *it, const Ptr data);
 /** Automatic macro to send the address of data to arrayItAddBefore_base */
 #define arrayItAddBefore(it, data) arrayItAddBefore_base(it, &(data))
+#define arrayItAddBeforeI(it, data, type) {type tmp = (data); arrayItAddBefore_base(it, &(tmp));}
 
 
 

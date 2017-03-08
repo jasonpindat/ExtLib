@@ -59,7 +59,7 @@
 		<Unit filename="src/String.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="testArray.c">
+		<Unit filename="testLValue.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="todo.txt" />

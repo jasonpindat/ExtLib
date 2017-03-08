@@ -148,6 +148,12 @@ int stringIndexOf(String str, const char *pattern, int from) {
     return -1;
 }
 
+int stringCompare(String str1, String str2) {
+    int len = str1->length <= str2->length ? str1->length : str2->length;
+
+    return strncmp(str1->ct, str2->ct, len);
+}
+
 
 
 void stringAppend(String str, const char *cStr) {

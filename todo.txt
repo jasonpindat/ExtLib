@@ -14,7 +14,9 @@ Skip list
 --
 
 Test List, SimpleList, String, Heap a faire, Completer les tests de Hash
-String : indexOf à tester
+String : indexOf et compare à tester
+Array : BSearch à tester
 
 Rendre heap possible en min et max
-Faire stringCompare / stringEquals
+Faire stringEquals
+ ?

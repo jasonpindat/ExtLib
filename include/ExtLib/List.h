@@ -142,6 +142,7 @@ const Ptr listGetLast_base(const List l);
 void listSetFirst_base(List l, const Ptr data);
 /** Automatic macro to send the address of data to listSetFirst_base */
 #define listSetFirst(l, data) listSetFirst_base(l, &(data))
+#define listSetFirstI(l, data, type) {type tmp = (data); listSetFirst_base(l, &(tmp));}
 
 /** \brief Updates the data of the last element of the list.
  *
@@ -153,6 +154,7 @@ void listSetFirst_base(List l, const Ptr data);
 void dllSetLast_base(List l, const Ptr data);
 /** Automatic macro to send the address of data to dllSetLast_base */
 #define dllSetLast(l, data) dllSetLast_base(l, &(data))
+#define listSetLastI(l, data, type) {type tmp = (data); listSetLast_base(l, &(tmp));}
 
 
 
@@ -166,6 +168,7 @@ void dllSetLast_base(List l, const Ptr data);
 void listAddFirst_base(List l, const Ptr data);
 /** Automatic macro to send the address of data to listAddFirst_base */
 #define listAddFirst(l, data) listAddFirst_base(l, &(data))
+#define listAddFirstI(l, data, type) {type tmp = (data); listAddFirst_base(l, &(tmp));}
 
 /** \brief Adds a new node at the end of the list.
  *
@@ -177,6 +180,7 @@ void listAddFirst_base(List l, const Ptr data);
 void listAddLast_base(List l, const Ptr data);
 /** Automatic macro to send the address of data to listAddLast_base */
 #define listAddLast(l, data) listAddLast_base(l, &(data))
+#define listAddLastI(l, data, type) {type tmp = (data); listAddLast_base(l, &(tmp));}
 
 
 
@@ -294,6 +298,7 @@ const Ptr listItGet_base(const ListIt *it);
  */
 void listItSet_base(ListIt *it, const Ptr data);
 #define listItSet(it, data) listItSet_base(it, &(data))
+#define listItSetI(it, data, type) {type tmp = (data); listItSet_base(it, &(tmp));}
 
 
 
@@ -307,6 +312,7 @@ void listItSet_base(ListIt *it, const Ptr data);
 void listItAddAfter_base(ListIt *it, const Ptr data);
 /** Automatic macro to send the address of data to listItAddAfter_base */
 #define listItAddAfter(it, data) listItAddAfter_base(it, &(data))
+#define listItAddAfterI(it, data, type) {type tmp = (data); listItAddAfter_base(it, &(tmp));}
 
 /** \brief Adds a new element before the position pointed by the iterator.
  *
@@ -318,6 +324,7 @@ void listItAddAfter_base(ListIt *it, const Ptr data);
 void listItAddBefore_base(ListIt *it, const Ptr data);
 /** Automatic macro to send the address of data to listItAddBefore_base */
 #define listItAddBefore(it, data) listItAddBefore_base(it, &(data))
+#define listItAddBeforeI(it, data, type) {type tmp = (data); listItAddBefore_base(it, &(tmp));}
 
 
 

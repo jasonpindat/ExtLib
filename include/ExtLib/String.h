@@ -133,6 +133,15 @@ char stringGet(String str, int pos);
  */
 int stringIndexOf(String str, const char *pattern, int from);
 
+/** \brief Compares 2 strings (same behaviour as strmp())
+ *
+ * \param str1 : a string.
+ * \param str2 : a string.
+ * \return <0 : the first character that does not match has a lower value in ptr1 than in ptr2, 0 : the contents of both strings are equal, >0 : the first character that does not match has a greater value in ptr1 than in ptr2.
+ *
+ */
+int stringCompare(String str1, String str2);
+
 
 
 /** \brief Appends a C string to a string.

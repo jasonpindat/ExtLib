@@ -184,6 +184,28 @@ int arrayLastIndexOf(const Array a, const Ptr data) {
     return -1;
 }
 
+int arrayBSearch(const Array a, const Ptr data) {
+    int first = 0;
+    int last = a->length - 1;
+    int middle = (first + last) / 2;
+    int cmpVal;
+
+    while(first <= last) {
+        cmpVal = a->cmpFct(a->ptrTransform(&a->ct[middle]), data);
+
+        if(cmpVal < 0)
+            first = middle + 1;
+        else if(cmpVal == 0)
+            return middle;
+        else
+            last = middle - 1;
+
+        middle = (first + last) / 2;
+    }
+
+    return -1; //if(first > last)
+}
+
 
 
 const Ptr arrayGet_base(const Array a, int pos) {

@@ -120,6 +120,7 @@ int hashLength(const Hash h);
  */
 bool hashContains_base(const Hash h, const Ptr key);
 #define hashContains(h, key) hashContains_base(h, &(key))
+#define hashContainsI(h, key, type) {type tmp = (key); hashContains_base(h, &(tmp));}
 
 
 
@@ -145,6 +146,9 @@ const Ptr hashGet_base(const Hash h, const Ptr key);
  */
 void hashSet_base(Hash h, const Ptr key, const Ptr data);
 #define hashSet(h, key, data) hashSet_base(h, &(key), &(data))
+#define hashSetIK(h, key, typek, data) {typek tmpk = (key); hashSet_base(h, &(tmpk), &(data));}
+#define hashSetIV(h, key, data, typev) {typev tmpv = (data); hashSet_base(h, &(key), &(tmpv));}
+#define hashSetI(h, key, typek, data, typev) {typek tmpk = (key); typev tmpv = (data); hashSet_base(h, &(tmpk), &(tmpv));}
 
 
 
@@ -157,6 +161,7 @@ void hashSet_base(Hash h, const Ptr key, const Ptr data);
  */
 bool hashUnset_base(Hash h, const Ptr key);
 #define hashUnset(h, key) hashUnset_base(h, &(key))
+#define hashUnsetI(h, key, type) {type tmp = (key); hashUnset_base(h, &(tmp));}
 
 
 
@@ -230,6 +235,7 @@ const Ptr hashItGet_base(const HashIt *it);
  */
 void hashItSet_base(HashIt *it, const Ptr data);
 #define hashItSet(it, data) hashItSet_base(it, &(data))
+#define hashItSetI(it, data, type) {type tmp = (data); hashItSet_base(it, &(tmp));}
 
 
 

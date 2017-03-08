@@ -29,7 +29,9 @@ typedef Array Stack;
 
 #define stackTop(s, type)                   arrayGet(s, arrayLength(s)-1, type)
 #define stackSet(s, data)					arraySet(s, arrayLength(s)-1, data)
+#define stackSetI(s, data, type)			arraySetI(s, arrayLength(s)-1, data, type)
 #define stackPush(s, data)                  arrayPush(s, data)
+#define stackPushI(s, data, type)           arrayPushI(s, data, type)
 #define stackPop(s)                         arrayPop(s)
 
 #define stackDump(s)                        arrayDump(s)

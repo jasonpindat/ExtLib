@@ -133,6 +133,7 @@ const Ptr simpleListGetFirst_base(const SimpleList l);
 void simpleListSetFirst_base(SimpleList l, const Ptr data);
 /** Automatic macro to send the address of data to simpleListSetFirst_base */
 #define simpleListSetFirst(l, data) simpleListSetFirst_base(l, &(data))
+#define simpleListSetFirstI(l, data, type) {type tmp = (data); simpleListSetFirst_base(l, &(tmp));}
 
 
 
@@ -146,6 +147,7 @@ void simpleListSetFirst_base(SimpleList l, const Ptr data);
 void simpleListAddFirst_base(SimpleList l, const Ptr data);
 /** Automatic macro to send the address of data to simpleListAddFirst_base */
 #define simpleListAddFirst(l, data) simpleListAddFirst_base(l, &(data))
+#define simpleListAddFirstI(l, data, type) {type tmp = (data); simpleListAddFirst_base(l, &(tmp));}
 
 
 
@@ -240,6 +242,7 @@ const Ptr simpleListItGet_base(const SimpleListIt *it);
  */
 void simpleListItSet_base(SimpleListIt *it, const Ptr data);
 #define simpleListItSet(it, data) simpleListItSet_base(it, &(data))
+#define simpleListItSetI(it, data, type) {type tmp = (data); simpleListItSet_base(it, &(tmp));}
 
 
 
@@ -253,6 +256,7 @@ void simpleListItSet_base(SimpleListIt *it, const Ptr data);
 void simpleListItAddAfter_base(SimpleListIt *it, const Ptr data);
 /** Automatic macro to send the address of data to simpleListItAddAfter_base */
 #define simpleListItAddAfter(it, data) simpleListItAddAfter_base(it, &(data))
+#define simpleListIAddAfterI(it, data, type) {type tmp = (data); simpleListItAddAfter_base(it, &(tmp));}
 
 
 

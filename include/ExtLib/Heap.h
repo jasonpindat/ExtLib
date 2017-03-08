@@ -121,6 +121,7 @@ const Ptr heapGet_base(const Heap h);
 void heapPush_base(Heap h, const Ptr data);
 /** Automatic macro to send the address of data to heapPush_base */
 #define heapPush(h, data) heapPush_base(h, &(data))
+#define heapPushI(h, data, type) {type tmp = (data); heapPush_base(h, &(tmp));}
 
 
 
