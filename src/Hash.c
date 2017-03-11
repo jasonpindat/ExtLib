@@ -226,8 +226,6 @@ void hashClear(Hash h) {
     for(HashIt it = hashItNew(h); hashItExists(&it); hashItNext(&it))
         hashItRemove(&it);
 
-    h->length = 0;
-
     h->size = DEFSIZE;
     h->ct = realloc(h->ct, DEFSIZE * sizeof(HashNode));
 }
@@ -301,6 +299,8 @@ void hashSet_base(Hash h, const Ptr key, const Ptr data) {
             h->keyCopyFct((void *)node+sizeof(struct _HashNode), key);
         else
             memcpy((void *)node+sizeof(struct _HashNode), key, h->keySize);
+
+        h->length++;
     }
     else if(h->delFct)
         h->delFct(node->data);
@@ -341,6 +341,8 @@ bool hashUnset_base(Hash h, const Ptr key) {
         h->delFct(node->data);
 
     free(node);
+
+    h->length--;
 
     return true;
 }
@@ -452,4 +454,6 @@ void hashItRemove(HashIt *it) {
     free(node);
 
     it->onNext = true;
+
+    it->hash->length--;
 }
